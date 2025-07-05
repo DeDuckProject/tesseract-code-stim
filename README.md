@@ -13,8 +13,8 @@ This repository contains implementations and simulations of the Tesseract quantu
 
 ```bash
 # Clone the repository
-git clone https://github.com/DeDuckProject/tesseract-code.git
-cd tesseract-code
+git clone https://github.com/DeDuckProject/tesseract-code-stim.git
+cd tesseract-code-stim
 
 # Create and activate a virtual environment (recommended)
 python -m venv venv
