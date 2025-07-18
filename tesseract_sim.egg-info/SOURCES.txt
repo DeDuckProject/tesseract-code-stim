@@ -6,10 +6,14 @@ tesseract_sim/correction_rules.py
 tesseract_sim/decoder_manual.py
 tesseract_sim/encoding_manual.py
 tesseract_sim/measurement_rounds.py
+tesseract_sim/noise_cfg.py
+tesseract_sim/noise_utils.py
 tesseract_sim/run.py
 tesseract_sim.egg-info/PKG-INFO
 tesseract_sim.egg-info/SOURCES.txt
 tesseract_sim.egg-info/dependency_links.txt
 tesseract_sim.egg-info/top_level.txt
+tests/test_encoding_manual.py
 tests/test_no_noise_accepts_all.py
+tests/test_noise_injection.py
 tests/test_rejects_some_noise.py

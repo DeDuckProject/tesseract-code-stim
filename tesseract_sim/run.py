@@ -13,8 +13,9 @@ def build_circuit(rounds: int, cfg: NoiseCfg = NO_NOISE, channel_noise_level=0, 
     encode_manual(circuit, cfg=cfg)
     # -----------------------------
 
-    # Now, apply noise to the encoded state
-    channel(circuit, channel_noise_level, noise_type=channel_noise_type)
+    if (channel_noise_level > 0):
+        # Now, apply noise to the encoded state
+        channel(circuit, channel_noise_level, noise_type=channel_noise_type)
 
     # Append the error correction rounds to the circuit
     error_correct_manual(circuit, rounds=rounds, cfg=cfg)

@@ -7,13 +7,14 @@ import os
 def plot_acceptance_rates():
     # Combine detailed lower rounds with higher rounds
     rounds = list(range(1, 11)) + [20, 30, 40, 50]
-    # noise_levels = [0.001, 0.01, 0.05, 0.1, 0.2, 0.3]
-    noise_levels = np.linspace(0.0001, 0.01, 30)
+    noise_levels_channel = [0, 0.001, 0.01, 0.05, 0.1, 0.2, 0.3]
+    # noise_levels_gates = [0.001, 0.01, 0.05, 0.1, 0.2, 0.3]
+    noise_levels_gates = np.linspace(0.0000, 0.01, 30)
     shots = 10000  # Number of shots per data point
     
     plt.figure(figsize=(12, 8))
     
-    for noise in noise_levels:
+    for noise in noise_levels_gates:
         acceptance_rates = []
         
         # Configure noise for the EC phase only
@@ -38,7 +39,7 @@ def plot_acceptance_rates():
     plt.legend()
     
     # Save to plots folder
-    output_filename = os.path.join('plots', 'acceptance_rates_ec_noise.png')
+    output_filename = os.path.join('../plots', 'acceptance_rates_ec_noise.png')
     plt.savefig(output_filename)
     print(f"Plot saved to {output_filename}")
     plt.close()

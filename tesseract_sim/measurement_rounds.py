@@ -17,6 +17,10 @@ def measure_x_z_stabilizer(circuit, data_qubits, x_ancilla, z_ancilla, cfg: Nois
     X stabilizer is measured on x_ancilla.
     Z stabilizer is measured on z_ancilla. The Z measurement also acts as a flag for the X measurement.
     """
+    # Reset for fresh ancillas
+    append_1q(circuit, "R", x_ancilla, phase="ec", cfg=cfg)
+    append_1q(circuit, "R", z_ancilla, phase="ec", cfg=cfg)
+
     append_1q(circuit, "H", x_ancilla, phase="ec", cfg=cfg)
     for q in data_qubits:
         append_2q(circuit, "CNOT", x_ancilla, q, phase="ec", cfg=cfg)
@@ -27,9 +31,6 @@ def measure_x_z_stabilizer(circuit, data_qubits, x_ancilla, z_ancilla, cfg: Nois
     # In stim, the order of measurements in a single M command matters for rec targeting.
     # M x_ancilla, z_ancilla means x is rec(-2), z is rec(-1)
     append_2q(circuit, "M", x_ancilla, z_ancilla, phase="ec", cfg=cfg)
-    append_1q(circuit, "R", x_ancilla, phase="ec", cfg=cfg)
-    append_1q(circuit, "R", z_ancilla, phase="ec", cfg=cfg)
-
 
 def error_correction_round_rows(circuit, cfg: NoiseCfg = NO_NOISE):
     """

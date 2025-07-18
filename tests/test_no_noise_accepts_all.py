@@ -1,4 +1,5 @@
 from tesseract_sim import run_simulation
+from tesseract_sim.noise_cfg import NO_NOISE
 
 def test_no_noise_accepts_all():
     """
@@ -7,7 +8,7 @@ def test_no_noise_accepts_all():
     accept_count, reject_count = run_simulation(
         rounds=1, 
         shots=100, 
-        noise_level=0.0
+        cfg=NO_NOISE
     )
     assert reject_count == 0
     assert accept_count == 100 
