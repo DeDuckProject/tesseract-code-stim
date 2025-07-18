@@ -1,4 +1,6 @@
 import stim
+from .noise_utils import append_1q, append_2q
+from .noise_cfg import NoiseCfg, NO_NOISE
 
 measurement_operators_rows = [
     [0,1,2,3],
@@ -14,14 +16,14 @@ measurement_operators_columns = [
     [3,7,11,15]
 ]
 
-def encode_sub_circuit_quad(circuit, ancilla, qubits):
-    circuit.append("CNOT", [qubits[0], ancilla]) # Flag qubit
-    circuit.append("CNOT", [qubits[0], qubits[1]])
-    circuit.append("CNOT", [qubits[0], qubits[2]])
-    circuit.append("CNOT", [qubits[0], qubits[3]])
-    circuit.append("CNOT", [qubits[0], ancilla]) # Flag qubit
+def encode_sub_circuit_quad(circuit, ancilla, qubits, cfg: NoiseCfg = NO_NOISE):
+    append_2q(circuit, "CNOT", qubits[0], ancilla, phase="enc", cfg=cfg) # Flag qubit
+    append_2q(circuit, "CNOT", qubits[0], qubits[1], phase="enc", cfg=cfg)
+    append_2q(circuit, "CNOT", qubits[0], qubits[2], phase="enc", cfg=cfg)
+    append_2q(circuit, "CNOT", qubits[0], qubits[3], phase="enc", cfg=cfg)
+    append_2q(circuit, "CNOT", qubits[0], ancilla, phase="enc", cfg=cfg) # Flag qubit
 
-def add_cnot_gates(circuit, start1, start2, num_gates=4):
+def add_cnot_gates(circuit, start1, start2, num_gates=4, cfg: NoiseCfg = NO_NOISE):
     """
     Adds CNOT gates to the circuit.
 
@@ -32,28 +34,35 @@ def add_cnot_gates(circuit, start1, start2, num_gates=4):
     - num_gates: The number of CNOT gates to append (default is 4).
     """
     for i in range(num_gates):
-        circuit.append("CNOT", [start1 + i, start2 + i])
+        append_2q(circuit, "CNOT", start1 + i, start2 + i, phase="enc", cfg=cfg)
 
-def encode_manual(circuit):
+def encode_manual(circuit, cfg: NoiseCfg = NO_NOISE):
     # Here we encode the state |++0000> as can be seen in Fig. 9 of that paper
     # initialize qubits:
-    circuit.append("H", [0,1,2,3,4,8,12])
+    append_1q(circuit, "H", 0, phase="enc", cfg=cfg)
+    append_1q(circuit, "H", 1, phase="enc", cfg=cfg)
+    append_1q(circuit, "H", 2, phase="enc", cfg=cfg)
+    append_1q(circuit, "H", 3, phase="enc", cfg=cfg)
+    append_1q(circuit, "H", 4, phase="enc", cfg=cfg)
+    append_1q(circuit, "H", 8, phase="enc", cfg=cfg)
+    append_1q(circuit, "H", 12, phase="enc", cfg=cfg)
 
-    encode_sub_circuit_quad(circuit, 20, [4, 5, 6, 7])
-    encode_sub_circuit_quad(circuit, 21, [8, 9, 10, 11])
-    encode_sub_circuit_quad(circuit, 22, [12, 13, 14, 15])
+    encode_sub_circuit_quad(circuit, 20, [4, 5, 6, 7], cfg=cfg)
+    encode_sub_circuit_quad(circuit, 21, [8, 9, 10, 11], cfg=cfg)
+    encode_sub_circuit_quad(circuit, 22, [12, 13, 14, 15], cfg=cfg)
 
-    add_cnot_gates(circuit, 0, 16) # working on ancilla qubits as flag qubits
-    add_cnot_gates(circuit, 0, 4)
-    add_cnot_gates(circuit, 0, 8)
-    add_cnot_gates(circuit, 0, 12)
-    add_cnot_gates(circuit, 0, 16) # working on ancilla qubits as flag qubits
+    add_cnot_gates(circuit, 0, 16, cfg=cfg) # working on ancilla qubits as flag qubits
+    add_cnot_gates(circuit, 0, 4, cfg=cfg)
+    add_cnot_gates(circuit, 0, 8, cfg=cfg)
+    add_cnot_gates(circuit, 0, 12, cfg=cfg)
+    add_cnot_gates(circuit, 0, 16, cfg=cfg) # working on ancilla qubits as flag qubits
 
-    circuit.append("R", [18, 19]) # Reset ancillas 18,19 since their role is done and we need them for the following
-    circuit.append("H", [19])
-    circuit.append("CNOT", [19, 18]) # cnot to flag qubit
-    circuit.append("CNOT", [19, 0]) # measuring stabilizer
-    circuit.append("CNOT", [19, 1]) # measuring stabilizer
-    circuit.append("CNOT", [19, 2]) # measuring stabilizer
-    circuit.append("CNOT", [19, 3]) # measuring stabilizer
-    circuit.append("CNOT", [19, 18]) # cnot to flag qubit 
+    append_1q(circuit, "R", 18, phase="enc", cfg=cfg)
+    append_1q(circuit, "R", 19, phase="enc", cfg=cfg) # Reset ancillas 18,19 since their role is done and we need them for the following
+    append_1q(circuit, "H", 19, phase="enc", cfg=cfg)
+    append_2q(circuit, "CNOT", 19, 18, phase="enc", cfg=cfg) # cnot to flag qubit
+    append_2q(circuit, "CNOT", 19, 0, phase="enc", cfg=cfg) # measuring stabilizer
+    append_2q(circuit, "CNOT", 19, 1, phase="enc", cfg=cfg) # measuring stabilizer
+    append_2q(circuit, "CNOT", 19, 2, phase="enc", cfg=cfg) # measuring stabilizer
+    append_2q(circuit, "CNOT", 19, 3, phase="enc", cfg=cfg) # measuring stabilizer
+    append_2q(circuit, "CNOT", 19, 18, phase="enc", cfg=cfg) # cnot to flag qubit 

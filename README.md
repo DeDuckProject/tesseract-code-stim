@@ -45,6 +45,41 @@ jupyter notebook
 
 Then navigate to one of the notebooks to run experiments and simulations.
 
+### Running Simulations with Noise
+
+The `tesseract_sim/run.py` script now supports configurable noise injection during encoding and error correction phases. You can control whether noise is active and set independent 1-qubit and 2-qubit error rates for each phase.
+
+```bash
+python -m tesseract_sim.run --help
+```
+
+**Example Usages:**
+
+*   **Run simulation with default settings (no noise):**
+    ```bash
+    python -m tesseract_sim.run
+    ```
+
+*   **Run simulation with encoding noise enabled (1-qubit rate 0.001, 2-qubit rate 0.002):**
+    ```bash
+    python -m tesseract_sim.run --enc-active --enc-rate-1q 0.001 --enc-rate-2q 0.002
+    ```
+
+*   **Run simulation with error correction noise enabled (1-qubit rate 0.003, 2-qubit rate 0.004):**
+    ```bash
+    python -m tesseract_sim.run --ec-active --ec-rate-1q 0.003 --ec-rate-2q 0.004
+    ```
+
+*   **Run simulation with both encoding and error correction noise:**
+    ```bash
+    python -m tesseract_sim.run --enc-active --enc-rate-1q 0.001 --ec-active --ec-rate-1q 0.003 --rounds 5 --shots 5000
+    ```
+
+*   **Run simulation with noise enabled but zero rates (effectively no noise):**
+    ```bash
+    python -m tesseract_sim.run --enc-active --enc-rate-1q 0.0 --ec-active --ec-rate-1q 0.0
+    ```
+
 ## License
 
 MIT License 
