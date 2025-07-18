@@ -1,0 +1,13 @@
+from tesseract_sim import run_simulation
+
+def test_no_noise_accepts_all():
+    """
+    Given no noise, the simulation should accept all shots.
+    """
+    accept_count, reject_count = run_simulation(
+        rounds=1, 
+        shots=100, 
+        noise_level=0.0
+    )
+    assert reject_count == 0
+    assert accept_count == 100 
