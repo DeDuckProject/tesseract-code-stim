@@ -54,10 +54,10 @@ z_stabilizers = [
 ## Trying to create circuit from tableau based on stabilizer generators
 # In order to encode some codeword in the codespace, I've used this reference:
 # https://quantumcomputing.stackexchange.com/questions/32437/a-simple-way-of-encoding-qubit-in-stabilizer-codes-with-stim
-def init_circuit():
+def init_circuit(qubits=16):
     circuit = stim.Circuit()
     # Adding qubit coordinates metadata
-    for qubit in range(16):
+    for qubit in range(qubits):
         x = qubit % 4
         y = qubit // 4
         circuit.append_operation("QUBIT_COORDS", [qubit], [x, y])
