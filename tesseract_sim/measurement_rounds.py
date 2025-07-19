@@ -21,11 +21,18 @@ def measure_x_z_stabilizer(circuit, data_qubits, x_ancilla, z_ancilla, cfg: Nois
     append_1q(circuit, "R", x_ancilla, phase="ec", cfg=cfg)
     append_1q(circuit, "R", z_ancilla, phase="ec", cfg=cfg)
 
-    append_1q(circuit, "H", x_ancilla, phase="ec", cfg=cfg)
-    for q in data_qubits:
-        append_2q(circuit, "CNOT", x_ancilla, q, phase="ec", cfg=cfg)
-    for q in data_qubits:
-        append_2q(circuit, "CNOT", q, z_ancilla, phase="ec", cfg=cfg)
+    append_1q(circuit, "H", x_ancilla, phase="ec", cfg=cfg) # x ancilla should be in |+>
+
+    append_2q(circuit, "CNOT", data_qubits[0], z_ancilla, phase="ec", cfg=cfg)
+    append_2q(circuit, "CNOT", x_ancilla, data_qubits[1], phase="ec", cfg=cfg)
+    append_2q(circuit, "CNOT", data_qubits[1], z_ancilla, phase="ec", cfg=cfg)
+    append_2q(circuit, "CNOT", x_ancilla, data_qubits[0], phase="ec", cfg=cfg)
+    append_2q(circuit, "CNOT", data_qubits[2], z_ancilla, phase="ec", cfg=cfg)
+    append_2q(circuit, "CNOT", x_ancilla, data_qubits[3], phase="ec", cfg=cfg)
+    append_2q(circuit, "CNOT", data_qubits[3], z_ancilla, phase="ec", cfg=cfg)
+    append_2q(circuit, "CNOT", x_ancilla, data_qubits[2], phase="ec", cfg=cfg)
+
+    # changing x ancilla to computational basis for future measurement:
     append_1q(circuit, "H", x_ancilla, phase="ec", cfg=cfg)
 
     # In stim, the order of measurements in a single M command matters for rec targeting.
