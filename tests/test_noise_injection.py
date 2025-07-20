@@ -2,7 +2,7 @@ import pytest
 import stim
 from tesseract_sim.noise_cfg import NoiseCfg, NO_NOISE
 from tesseract_sim.noise_utils import append_op, append_1q, append_2q
-from tesseract_sim.encoding_manual import encode_manual
+from tesseract_sim.encoding_manual_9a import encode_manual_fig9a
 from tesseract_sim.measurement_rounds import error_correct_manual
 from tesseract_sim.run import build_circuit
 

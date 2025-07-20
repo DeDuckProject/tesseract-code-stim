@@ -1,5 +1,5 @@
 import stim
-from .encoding_manual import measurement_operators_rows, measurement_operators_columns
+from .commons import measurement_operators_rows, measurement_operators_columns
 from .noise_utils import append_1q, append_2q
 from .noise_cfg import NoiseCfg, NO_NOISE
 

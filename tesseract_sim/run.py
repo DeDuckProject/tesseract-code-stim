@@ -1,6 +1,6 @@
 import argparse
 from .circuit_base import init_circuit, channel
-from .encoding_manual import encode_manual
+from .encoding_manual_9a import encode_manual_fig9a
 from .measurement_rounds import error_correct_manual
 from .decoder_manual import run_manual_error_correction
 from .noise_cfg import NoiseCfg, NO_NOISE
@@ -10,7 +10,7 @@ def build_circuit(rounds: int, cfg: NoiseCfg = NO_NOISE, channel_noise_level=0, 
     circuit = init_circuit(qubits=18)
 
     # First, prepare a valid encoded state
-    encode_manual(circuit, cfg=cfg)
+    encode_manual_fig9a(circuit, cfg=cfg)
     # -----------------------------
 
     if (channel_noise_level > 0):

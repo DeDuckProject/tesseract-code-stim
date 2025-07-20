@@ -1,5 +1,5 @@
 import stim
-from tesseract_sim.encoding_manual import encode_manual_fig9a
+from tesseract_sim.encoding_manual_9a import encode_manual_fig9a
 from tesseract_sim.commons import measurement_operators_rows, measurement_operators_columns
 from tesseract_sim.measurement_rounds import measure_x_z_stabilizer
 import pytest

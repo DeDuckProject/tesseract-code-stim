@@ -1,20 +1,8 @@
-import stim
 from .noise_utils import append_1q, append_2q
 from .noise_cfg import NoiseCfg, NO_NOISE
 
-measurement_operators_rows = [
-    [0,1,2,3],
-    [4,5,6,7],
-    [8,9,10,11],
-    [12,13,14,15]
-]
 
-measurement_operators_columns = [
-    [0,4,8,12],
-    [1,5,9,13],
-    [2,6,10,14],
-    [3,7,11,15]
-]
+# This file contains the functions for encoding the state |++0000> as described in Fig. 9a of that paper
 
 def encode_sub_circuit_quad(circuit, ancilla, qubits, cfg: NoiseCfg = NO_NOISE):
     append_2q(circuit, "CNOT", qubits[0], ancilla, phase="enc", cfg=cfg) # Flag qubit
@@ -36,8 +24,8 @@ def add_cnot_gates(circuit, start1, start2, num_gates=4, cfg: NoiseCfg = NO_NOIS
     for i in range(num_gates):
         append_2q(circuit, "CNOT", start1 + i, start2 + i, phase="enc", cfg=cfg)
 
-def encode_manual(circuit, cfg: NoiseCfg = NO_NOISE):
-    # Here we encode the state |++0000> as can be seen in Fig. 9 of that paper
+def encode_manual_fig9a(circuit, cfg: NoiseCfg = NO_NOISE):
+    # Here we encode the state |++0000> as can be seen in Fig. 9a of that paper
     # initialize qubits:
     append_1q(circuit, "H", 0, phase="enc", cfg=cfg)
     append_1q(circuit, "H", 1, phase="enc", cfg=cfg)
