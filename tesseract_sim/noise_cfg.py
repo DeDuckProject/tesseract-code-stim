@@ -12,4 +12,6 @@ class NoiseCfg:
     op1: str = "DEPOLARIZE1"
     op2: str = "DEPOLARIZE2"
 
+# TODO add noise on 'meas' phase as well
+
 NO_NOISE = NoiseCfg() 

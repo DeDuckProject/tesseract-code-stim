@@ -7,10 +7,15 @@ def append_detector_on_last_n_measurements(circuit, num_measurements=4):
         stim.target_rec(-i) for i in range(1,num_measurements+1)
     ])
 
-def process_shot(shot_data, rounds):
+def process_shot(shot_data, rounds, measurement_offset=0):
     """
     Processes the measurement data for a single shot to apply the error correction logic.
     This function simulates the classical processing part of the decoder.
+    Args:
+        shot_data: The measurement data for a single shot
+        rounds: The number of rounds to process
+        measurement_offset: The offset of the measurements to start from.
+            This is needed when we have measurements before the error correction rounds, for e.g., when encoding.
     """
     flagX = -1
     flagZ = -1
@@ -22,7 +27,7 @@ def process_shot(shot_data, rounds):
     measurements_per_round = 8 * 2
     
     for r in range(rounds):
-        round_start_index = r * measurements_per_round
+        round_start_index = r * measurements_per_round + measurement_offset
         
         # --- Row Pass ---
         # The first 8 measurements are from the 4 row-stabilizers

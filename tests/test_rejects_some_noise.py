@@ -1,4 +1,4 @@
-from tesseract_sim import run_simulation
+from tesseract_sim import run_simulation_experiment1
 from tesseract_sim.noise_cfg import NoiseCfg
 
 def test_rejects_some_noise():
@@ -8,7 +8,7 @@ def test_rejects_some_noise():
     it's virtually guaranteed to have rejections.
     """
     noise_config = NoiseCfg(ec_active=True, ec_rate_1q=0.01)
-    accept_count, reject_count = run_simulation(
+    accept_count, reject_count = run_simulation_experiment1(
         rounds=2,
         shots=1000,
         cfg=noise_config

@@ -4,7 +4,7 @@ from tesseract_sim.noise_cfg import NoiseCfg, NO_NOISE
 from tesseract_sim.noise_utils import append_op, append_1q, append_2q
 from tesseract_sim.encoding_manual_9a import encode_manual_fig9a
 from tesseract_sim.measurement_rounds import error_correct_manual
-from tesseract_sim.run import build_circuit
+from tesseract_sim.run import build_circuit_experiment1
 
 def count_noise_ops(circuit: stim.Circuit, op_type: str) -> int:
     """Counts the number of noise operations of a given type in the circuit."""
@@ -22,7 +22,7 @@ def test_no_noise_config():
 def test_encoding_noise_only():
     # Test: Noise only in encoding phase
     cfg = NoiseCfg(enc_active=True, enc_rate_1q=0.1, enc_rate_2q=0.2, ec_active=False)
-    circuit = build_circuit(rounds=1, cfg=cfg)
+    circuit = build_circuit_experiment1(rounds=1, cfg=cfg)
     
     # Check for depolarizing noise in encoding section
     # This is a bit tricky to assert precisely without deep inspection of Stim's circuit object
@@ -38,20 +38,20 @@ def test_encoding_noise_only():
 def test_error_correction_noise_only():
     # Test: Noise only in error correction phase
     cfg = NoiseCfg(enc_active=False, ec_active=True, ec_rate_1q=0.1, ec_rate_2q=0.2)
-    circuit = build_circuit(rounds=1, cfg=cfg)
+    circuit = build_circuit_experiment1(rounds=1, cfg=cfg)
     
     assert count_noise_ops(circuit, "DEPOLARIZE1") > 0 or count_noise_ops(circuit, "DEPOLARIZE2") > 0
 
 def test_both_noise_active():
     # Test: Noise in both encoding and error correction phases
     cfg = NoiseCfg(enc_active=True, enc_rate_1q=0.01, ec_active=True, ec_rate_1q=0.01)
-    circuit = build_circuit(rounds=1, cfg=cfg)
+    circuit = build_circuit_experiment1(rounds=1, cfg=cfg)
     
     assert count_noise_ops(circuit, "DEPOLARIZE1") > 0 or count_noise_ops(circuit, "DEPOLARIZE2") > 0
 
 def test_zero_noise_rates():
     # Test: Active noise but zero rates should result in no noise operations
     cfg = NoiseCfg(enc_active=True, enc_rate_1q=0.0, enc_rate_2q=0.0, ec_active=True, ec_rate_1q=0.0, ec_rate_2q=0.0)
-    circuit = build_circuit(rounds=1, cfg=cfg)
+    circuit = build_circuit_experiment1(rounds=1, cfg=cfg)
     assert count_noise_ops(circuit, "DEPOLARIZE1") == 0
     assert count_noise_ops(circuit, "DEPOLARIZE2") == 0 

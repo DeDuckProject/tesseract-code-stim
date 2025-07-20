@@ -1,12 +1,17 @@
 import argparse
+
+from tesseract_sim.encoding_manual_9b import encode_manual_fig9b
 from .circuit_base import init_circuit, channel
 from .encoding_manual_9a import encode_manual_fig9a
-from .measurement_rounds import error_correct_manual
+from .measurement_rounds import error_correct_manual, measure_logical_operators_tesseract
 from .decoder_manual import run_manual_error_correction
 from .noise_cfg import NoiseCfg, NO_NOISE
 
-def build_circuit(rounds: int, cfg: NoiseCfg = NO_NOISE, channel_noise_level=0, channel_noise_type="DEPOLARIZE1"):
-    # We start with a fresh circuit from your helper function 16 qubits for code + 2 ancillas for measurement
+def build_circuit_experiment1(rounds: int, cfg: NoiseCfg = NO_NOISE, channel_noise_level=0, channel_noise_type="DEPOLARIZE1"):
+    # Here we start with the endocding of the state |++0000> as in Fig 9a, we there apply error correction rounds
+    # and calculate the acceptance rate without measuring the qubits at the end.
+
+    # We start with a fresh circuit
     circuit = init_circuit(qubits=16, ancillas=2)
 
     # First, prepare a valid encoded state
@@ -22,8 +27,30 @@ def build_circuit(rounds: int, cfg: NoiseCfg = NO_NOISE, channel_noise_level=0, 
     
     return circuit
 
-def run_simulation(rounds: int, shots: int, cfg: NoiseCfg = NO_NOISE):
-    circuit = build_circuit(rounds, cfg)
+def build_circuit_experiment2(rounds: int, cfg: NoiseCfg = NO_NOISE, channel_noise_level=0, channel_noise_type="DEPOLARIZE1"):
+    # Here we start with the endocding of the state |+0+0+0> as in Fig 9b, we there apply error correction rounds
+    # and calculate the acceptance rate. Eventally we measure the qubits to see if the state is correct.
+
+    # We start with a fresh circuit
+    circuit = init_circuit(qubits=16, ancillas=2)
+
+    # First, prepare a valid encoded state
+    encode_manual_fig9b(circuit, cfg=cfg)
+    # -----------------------------
+
+    if (channel_noise_level > 0):
+        # Now, apply noise to the encoded state
+        channel(circuit, channel_noise_level, noise_type=channel_noise_type)
+
+    # Append the error correction rounds to the circuit
+    error_correct_manual(circuit, rounds=rounds, cfg=cfg)
+
+    measure_logical_operators_tesseract(circuit, cfg=cfg)
+
+    return circuit
+
+def run_simulation_experiment1(rounds: int, shots: int, cfg: NoiseCfg = NO_NOISE):
+    circuit = build_circuit_experiment1(rounds, cfg)
     
     print(f"--- Running Manual Error Correction Simulation (Corrected) ---")
     print(f"Rounds: {rounds}, Shots: {shots}")
@@ -54,4 +81,4 @@ if __name__ == "__main__":
         ec_rate_2q=args.ec_rate_2q
     )
 
-    run_simulation(rounds=args.rounds, shots=args.shots, cfg=sim_cfg)
+    run_simulation_experiment1(rounds=args.rounds, shots=args.shots, cfg=sim_cfg)

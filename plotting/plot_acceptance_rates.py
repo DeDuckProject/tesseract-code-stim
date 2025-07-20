@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from tesseract_sim.run import run_simulation
+from tesseract_sim.run import run_simulation_experiment1
 from tesseract_sim.noise_cfg import NoiseCfg
 import os
 
@@ -26,7 +26,7 @@ def plot_acceptance_rates():
 
         for r in rounds:
             print(f"Processing rounds={r}, noise={noise} (EC only)")  # Progress indicator
-            accept_count, _ = run_simulation(rounds=r, shots=shots, cfg=noise_config)
+            accept_count, _ = run_simulation_experiment1(rounds=r, shots=shots, cfg=noise_config)
             acceptance_rate = accept_count / shots
             acceptance_rates.append(acceptance_rate)
         
