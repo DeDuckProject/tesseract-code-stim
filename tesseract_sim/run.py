@@ -4,7 +4,7 @@ from tesseract_sim.encoding_manual_9b import encode_manual_fig9b
 from .circuit_base import init_circuit, channel
 from .encoding_manual_9a import encode_manual_fig9a
 from .measurement_rounds import error_correct_manual, measure_logical_operators_tesseract
-from .decoder_manual import run_manual_error_correction
+from .decoder_manual import run_manual_error_correction, run_manual_error_correction_exp2
 from .noise_cfg import NoiseCfg, NO_NOISE
 
 def build_circuit_experiment1(rounds: int, cfg: NoiseCfg = NO_NOISE, channel_noise_level=0, channel_noise_type="DEPOLARIZE1"):
@@ -57,6 +57,14 @@ def run_simulation_experiment1(rounds: int, shots: int, cfg: NoiseCfg = NO_NOISE
     
     return run_manual_error_correction(circuit, shots=shots, rounds=rounds)
 
+def run_simulation_experiment2(rounds: int, shots: int, cfg: NoiseCfg = NO_NOISE):
+    circuit = build_circuit_experiment2(rounds, cfg)
+    
+    print(f"--- Running Manual Error Correction Simulation (with Logical Check) ---")
+    print(f"Rounds: {rounds}, Shots: {shots}")
+    
+    return run_manual_error_correction_exp2(circuit, shots=shots, rounds=rounds)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run tesseract code simulation with configurable noise.")
@@ -68,6 +76,7 @@ if __name__ == "__main__":
     parser.add_argument("--ec-active", action="store_true", help="Activate noise during error correction rounds.")
     parser.add_argument("--ec-rate-1q", type=float, default=0.0, help="1-qubit noise rate for error correction.")
     parser.add_argument("--ec-rate-2q", type=float, default=0.0, help="2-qubit noise rate for error correction.")
+    parser.add_argument("--experiment", type=int, choices=[1, 2], default=1, help="Which experiment to run (1 or 2)")
 
     args = parser.parse_args()
 
@@ -81,4 +90,7 @@ if __name__ == "__main__":
         ec_rate_2q=args.ec_rate_2q
     )
 
-    run_simulation_experiment1(rounds=args.rounds, shots=args.shots, cfg=sim_cfg)
+    if args.experiment == 1:
+        run_simulation_experiment1(rounds=args.rounds, shots=args.shots, cfg=sim_cfg)
+    else:
+        run_simulation_experiment2(rounds=args.rounds, shots=args.shots, cfg=sim_cfg)

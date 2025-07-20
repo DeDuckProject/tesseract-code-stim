@@ -1,0 +1,23 @@
+from tesseract_sim.run import run_simulation_experiment2
+from tesseract_sim.noise_cfg import NoiseCfg
+
+def test_exp2_noise_rejects_some():
+    """
+    Test that with noise, some shots fail either error correction or logical verification.
+    """
+    shots = 100
+    rounds = 3
+    
+    # Configure noise during error correction
+    cfg = NoiseCfg(
+        ec_active=True,
+        ec_rate_1q=0.01,  # 1% error rate on 1-qubit gates
+        ec_rate_2q=0.02   # 2% error rate on 2-qubit gates
+    )
+    
+    ec_accept, logical_pass, logical_fail = run_simulation_experiment2(rounds=rounds, shots=shots, cfg=cfg)
+    
+    # With noise, we expect some shots to fail, but not all
+    assert 0 < logical_pass < shots, "Some shots should pass with noise, but not all"
+    assert logical_fail > 0, "Some shots should fail logical verification with noise"
+    assert ec_accept > logical_pass, "Some shots that pass EC should fail logical verification" 

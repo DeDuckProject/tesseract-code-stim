@@ -92,3 +92,45 @@ def run_manual_error_correction(circuit, shots, rounds):
     print(f"Acceptance Rate: {accept_count/shots:.2%}")
 
     return accept_count, reject_count 
+
+def verify_final_state(shot_tail):
+    """
+    Verifies the final state measurements of both 8-3-2 color codes.
+    Args:
+        shot_tail: Last 16 measurements from the shot data (8 X measurements followed by 8 Z measurements)
+    Returns:
+        bool: True if both parities are correct (0), False otherwise
+    """
+    # Top half measured in X basis - all 8 bits should XOR to 0
+    top_parity = np.bitwise_xor.reduce(shot_tail[:8])
+    # Bottom half measured in Z basis - all 8 bits should XOR to 0
+    bottom_parity = np.bitwise_xor.reduce(shot_tail[8:])
+    return top_parity == 0 and bottom_parity == 0
+
+def run_manual_error_correction_exp2(circuit, shots, rounds):
+    """
+    Runs the full manual error correction simulation with final logical state verification.
+    Returns counts of shots that pass error correction and logical verification.
+    """
+    sampler = circuit.compile_sampler()
+    shot_data_all = sampler.sample(shots=shots)
+    
+    ec_accept = logical_pass = logical_fail = 0
+    
+    for shot_data in shot_data_all:
+        # Skip the two ancilla measurements from encoding when processing EC rounds
+        status, _, _ = process_shot(shot_data, rounds, measurement_offset=2)
+        
+        if status == "accept":
+            ec_accept += 1
+            # For accepted shots, verify the final logical state
+            if verify_final_state(shot_data[-16:]):
+                logical_pass += 1
+            else:
+                logical_fail += 1
+                
+    print(f"After EC rounds → {ec_accept}/{shots} accepted")
+    print(f"Final logical check → {logical_pass}/{ec_accept} pass" if ec_accept > 0 else "No shots passed EC")
+    print(f"Overall acceptance → {logical_pass/shots:.2%}")
+
+    return ec_accept, logical_pass, logical_fail 
