@@ -7,7 +7,7 @@ from .noise_cfg import NoiseCfg, NO_NOISE
 
 def build_circuit(rounds: int, cfg: NoiseCfg = NO_NOISE, channel_noise_level=0, channel_noise_type="DEPOLARIZE1"):
     # We start with a fresh circuit from your helper function 16 qubits for code + 2 ancillas for measurement
-    circuit = init_circuit(qubits=18)
+    circuit = init_circuit(qubits=16, ancillas=2)
 
     # First, prepare a valid encoded state
     encode_manual_fig9a(circuit, cfg=cfg)
