@@ -6,12 +6,13 @@ def encode_000_in_8_3_2_color_code(circuit, participating_qubits: list[int], anc
     """Encodes |000> state in an [[8,3,2]] color code as shown in Fig 9b.
 
     see:
-    E. Campbell, “The smallest interesting colour code,” Online available at https://earltcampbell.com/2016/09/26/the-smallest-interesting-colour-code/ (2016), accessed on 2019-12-09.
+    E. Campbell, "The smallest interesting colour code," Online available at https://earltcampbell.com/2016/09/26/the-smallest-interesting-colour-code/ (2016), accessed on 2019-12-09.
     https://errorcorrectionzoo.org/c/stab_8_3_2
     
     Args:
         circuit: The circuit to append operations to
-        start_qubit: The index of the first qubit in the 8-qubit block
+        participating_qubits: List of 8 qubits to encode
+        ancillas: List of 2 ancilla qubits [z_ancilla, x_ancilla]
         cfg: Noise configuration to use
     """
 
@@ -43,7 +44,7 @@ def encode_000_in_8_3_2_color_code(circuit, participating_qubits: list[int], anc
     append_2q(circuit, "CNOT", participating_qubits[3], participating_qubits[5], phase="enc", cfg=cfg)
     append_2q(circuit, "CNOT", participating_qubits[7], participating_qubits[2], phase="enc", cfg=cfg)
 
-#     for measuring stabilizers:
+    # for measuring stabilizers:
     append_2q(circuit, "CNOT", x_ancilla, participating_qubits[0], phase="enc", cfg=cfg)
     append_2q(circuit, "CNOT", participating_qubits[1], z_ancilla, phase="enc", cfg=cfg)
 
@@ -58,6 +59,10 @@ def encode_000_in_8_3_2_color_code(circuit, participating_qubits: list[int], anc
 
     # finally change X ancilla to computational basis
     append_1q(circuit, "H", x_ancilla, phase="enc", cfg=cfg)
+
+    # Measure ancilla qubits
+    append_1q(circuit, "M", x_ancilla, phase="enc", cfg=cfg)
+    append_1q(circuit, "M", z_ancilla, phase="enc", cfg=cfg)
 
 
 def encode_manual_fig9b(circuit, cfg: NoiseCfg = NO_NOISE):
