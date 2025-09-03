@@ -54,4 +54,29 @@ def test_zero_noise_rates():
     cfg = NoiseCfg(enc_active=True, enc_rate_1q=0.0, enc_rate_2q=0.0, ec_active=True, ec_rate_1q=0.0, ec_rate_2q=0.0)
     circuit = build_circuit_experiment1(rounds=1, cfg=cfg)
     assert count_noise_ops(circuit, "DEPOLARIZE1") == 0
-    assert count_noise_ops(circuit, "DEPOLARIZE2") == 0 
+    assert count_noise_ops(circuit, "DEPOLARIZE2") == 0
+
+def test_channel_noise_injection():
+    # Test: Channel noise should be injected when channel_noise_level > 0
+    cfg = NoiseCfg(channel_noise_level=0.1, channel_noise_type="DEPOLARIZE1")
+    circuit = build_circuit_experiment1(rounds=1, cfg=cfg)
+    
+    # Should have channel noise operations
+    assert count_noise_ops(circuit, "DEPOLARIZE1") > 0
+    
+def test_channel_noise_different_type():
+    # Test: Channel noise with different noise type
+    cfg = NoiseCfg(channel_noise_level=0.05, channel_noise_type="X_ERROR")
+    circuit = build_circuit_experiment1(rounds=1, cfg=cfg)
+    
+    # Should have X_ERROR operations
+    assert count_noise_ops(circuit, "X_ERROR") > 0
+    
+def test_no_channel_noise_by_default():
+    # Test: Default config should have no channel noise
+    cfg = NoiseCfg()
+    circuit = build_circuit_experiment1(rounds=1, cfg=cfg)
+    
+    # Should have no channel noise since channel_noise_level defaults to 0.0
+    assert count_noise_ops(circuit, "DEPOLARIZE1") == 0
+    assert count_noise_ops(circuit, "X_ERROR") == 0 

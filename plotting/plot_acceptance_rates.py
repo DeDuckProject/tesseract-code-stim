@@ -80,7 +80,7 @@ def plot_experiment1(
     raw_results = sweep_results(
         run_simulation_experiment1,
         rounds, noise_levels, shots,
-        lambda noise: NoiseCfg(ec_active=True, ec_rate_1q=noise, ec_rate_2q=noise),
+        lambda noise: NoiseCfg(ec_active=True, ec_rate_1q=noise, ec_rate_2q=noise, channel_noise_level=0.0),
         correct_pauli=correct_pauli
     )
 
@@ -110,7 +110,7 @@ def plot_experiment2(
     raw_results = sweep_results(
         run_simulation_experiment2,
         rounds, noise_levels, shots,
-        lambda noise: NoiseCfg(ec_active=True, ec_rate_1q=noise, ec_rate_2q=noise),
+        lambda noise: NoiseCfg(ec_active=True, ec_rate_1q=noise, ec_rate_2q=noise, channel_noise_level=0.0),
         correct_pauli=correct_pauli,
         encoding_mode=encoding_mode
     )
