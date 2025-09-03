@@ -73,14 +73,20 @@ def plot_experiment1(
     noise_levels: List[float],
     shots: int,
     out_dir: str,
-    correct_pauli: bool = True
+    correct_pauli: bool = True,
+    sweep_channel_noise: bool = False
 ) -> None:
     """Plots acceptance rates for experiment 1."""
     # One sweep collecting full results
+    if sweep_channel_noise:
+        cfg_builder = lambda noise: NoiseCfg(ec_active=False, channel_noise_level=noise, channel_noise_type="DEPOLARIZE1")
+    else:
+        cfg_builder = lambda noise: NoiseCfg(ec_active=True, ec_rate_1q=noise, ec_rate_2q=noise, channel_noise_level=0.0)
+    
     raw_results = sweep_results(
         run_simulation_experiment1,
         rounds, noise_levels, shots,
-        lambda noise: NoiseCfg(ec_active=True, ec_rate_1q=noise, ec_rate_2q=noise, channel_noise_level=0.0),
+        cfg_builder,
         correct_pauli=correct_pauli
     )
 
@@ -103,14 +109,20 @@ def plot_experiment2(
     shots: int,
     out_dir: str,
     correct_pauli: bool = True,
-    encoding_mode: Literal['9a', '9b'] = '9b'
+    encoding_mode: Literal['9a', '9b'] = '9b',
+    sweep_channel_noise: bool = False
 ) -> None:
     """Plots both EC acceptance and logical check rates for experiment 2."""
     # One sweep collecting full results
+    if sweep_channel_noise:
+        cfg_builder = lambda noise: NoiseCfg(ec_active=False, channel_noise_level=noise, channel_noise_type="DEPOLARIZE1")
+    else:
+        cfg_builder = lambda noise: NoiseCfg(ec_active=True, ec_rate_1q=noise, ec_rate_2q=noise, channel_noise_level=0.0)
+    
     raw_results = sweep_results(
         run_simulation_experiment2,
         rounds, noise_levels, shots,
-        lambda noise: NoiseCfg(ec_active=True, ec_rate_1q=noise, ec_rate_2q=noise, channel_noise_level=0.0),
+        cfg_builder,
         correct_pauli=correct_pauli,
         encoding_mode=encoding_mode
     )
@@ -121,11 +133,12 @@ def plot_experiment2(
         for noise, tuples in raw_results.items()
     }
 
+    noise_type = "Channel" if sweep_channel_noise else "EC"
     plot_curve(
         rounds, ec_data,
-        title="EC Acceptance vs Rounds (Experiment 2)",
+        title=f"{noise_type} Acceptance vs Rounds (Experiment 2)",
         ylabel="EC Acceptance Rate",
-        out_path=os.path.join(out_dir, 'acceptance_rates_ec_noise_exp2.png')
+        out_path=os.path.join(out_dir, f'acceptance_rates_{"channel" if sweep_channel_noise else "ec"}_noise_exp2.png')
     )
 
     # Derive logical check rate from same raw results - normalized by acceptance
@@ -139,9 +152,9 @@ def plot_experiment2(
 
     plot_curve(
         rounds, logical_data,
-        title="Logical Check Success vs Rounds (Experiment 2)",
+        title=f"Logical Check Success vs Rounds (Experiment 2) - {noise_type} Noise",
         ylabel="Logical Success Rate | Accepted",
-        out_path=os.path.join(out_dir, 'logical_rates_ec_noise_exp2.png')
+        out_path=os.path.join(out_dir, f'logical_rates_{"channel" if sweep_channel_noise else "ec"}_noise_exp2.png')
     )
 
 def main():
@@ -153,9 +166,8 @@ def main():
     parser.add_argument('--out-dir', type=str, default='../plots',
                       help='Output directory for plots')
     parser.add_argument('--correct-pauli', type=bool, default=False, help='Correct the Pauli frame')
-    # parser.add_argument('--correct-pauli', type=bool, default=True, help='Correct the Pauli frame')
-    # parser.add_argument('--encoding-mode', type=Literal['9a', '9b'], default='9b', help='Encoding mode')
     parser.add_argument('--encoding-mode', type=str, choices=['9a', '9b'], default='9a', help='Encoding mode')
+    parser.add_argument('--sweep-channel-noise', action='store_true', help='Sweep channel noise instead of EC noise')
     args = parser.parse_args()
 
     # Combine detailed lower rounds with higher rounds
@@ -167,9 +179,9 @@ def main():
     print(args.experiments)
     # Temp disable experiment1
     # if 1 in args.experiments:
-    #     plot_experiment1(rounds, noise_levels, args.shots, args.out_dir)
+    #     plot_experiment1(rounds, noise_levels, args.shots, args.out_dir, args.correct_pauli, args.sweep_channel_noise)
     if 2 in args.experiments:
-        plot_experiment2(rounds, noise_levels, args.shots, args.out_dir, args.correct_pauli, args.encoding_mode)
+        plot_experiment2(rounds, noise_levels, args.shots, args.out_dir, args.correct_pauli, args.encoding_mode, args.sweep_channel_noise)
 
 if __name__ == "__main__":
     main() 
