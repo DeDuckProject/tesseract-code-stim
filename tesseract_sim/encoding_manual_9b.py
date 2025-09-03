@@ -67,10 +67,18 @@ def encode_000_in_8_3_2_color_code(circuit, participating_qubits: list[int], anc
 
 def encode_manual_fig9b(circuit, cfg: NoiseCfg = NO_NOISE):
     """Encodes |+0+0+0> state according to Fig 9b by running the 8-qubit encoding twice.
-    First on rows 1,2 (qubits 0-7) and then on rows 3,4 (qubits 8-15)."""
+    First on rows 1,2 (qubits 0-7) and then on rows 3,4 (qubits 8-15).
+    
+    The first block is prepared in logical |+++> state by applying transversal Hadamards
+    after encoding |000>. The second block stays in logical |000> state."""
 
-    # Encode first block (rows 1,2, qubits 0-7)
+    # Encode first block (rows 1,2, qubits 0-7) in |000> state first
     encode_000_in_8_3_2_color_code(circuit, participating_qubits=[0, 1, 2, 3, 4, 5, 6, 7], ancillas=[16, 17], cfg=cfg)
     
-    # Encode second block (rows 3,4, qubits 8-15)
+    # Apply transversal Hadamards to first block to convert |000> to |+++>
+    # This ensures X measurements on the top half give deterministic results
+    for i in range(8):
+        append_1q(circuit, "H", i, phase="enc", cfg=cfg)
+    
+    # Encode second block (rows 3,4, qubits 8-15) in |000> state (stays as |000>)
     encode_000_in_8_3_2_color_code(circuit, participating_qubits=[8, 9, 10, 11, 12, 13, 14, 15], ancillas=[16, 17], cfg=cfg)
