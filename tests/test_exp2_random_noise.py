@@ -15,7 +15,7 @@ def test_exp2_noise_rejects_some():
         ec_rate_2q=0.02   # 2% error rate on 2-qubit gates
     )
     
-    ec_accept, logical_pass, logical_fail = run_simulation_experiment2(rounds=rounds, shots=shots, cfg=cfg)
+    ec_accept, logical_pass, logical_fail = run_simulation_experiment2(rounds=rounds, shots=shots, cfg=cfg, encoding_mode='9a')
     
     # With noise, we expect some shots to fail, but not all
     assert 0 < logical_pass < shots, "Some shots should pass with noise, but not all"
