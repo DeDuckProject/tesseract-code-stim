@@ -9,9 +9,9 @@ def test_9a_encoding_no_noise_perfect_state():
     # Build circuit with 9a encoding and no noise
     circuit = build_circuit_experiment2(rounds=1, cfg=NO_NOISE, encoding_mode='9a')
     
-    # Run simulation with only Z checks (appropriate for 9a encoding)
+    # Run simulation with 9a encoding mode (appropriate for 9a encoding)
     ec_accept, logical_pass, logical_fail = run_manual_error_correction_exp2(
-        circuit, shots=100, rounds=1, only_z_checks=True
+        circuit, shots=100, rounds=1, encoding_mode='9a'
     )
     
     # All shots should be accepted
@@ -25,9 +25,9 @@ def test_9a_encoding_no_error_correction():
     # Build circuit with 9a encoding and no error correction
     circuit = build_circuit_experiment2(rounds=0, cfg=NO_NOISE, encoding_mode='9a')
     
-    # Run simulation with only Z checks
+    # Run simulation with 9a encoding mode
     ec_accept, logical_pass, logical_fail = run_manual_error_correction_exp2(
-        circuit, shots=100, rounds=0, only_z_checks=True
+        circuit, shots=100, rounds=0, encoding_mode='9a'
     )
     
     # All shots should be accepted
@@ -43,7 +43,7 @@ def test_9a_encoding_without_pauli_correction():
     
     # Run simulation without Pauli correction
     ec_accept, logical_pass, logical_fail = run_manual_error_correction_exp2(
-        circuit, shots=100, rounds=1, correct_pauli=False, only_z_checks=True
+        circuit, shots=100, rounds=1, correct_pauli=False, encoding_mode='9a'
     )
     
     # All shots should be accepted
@@ -57,9 +57,9 @@ def test_9a_encoding_multiple_rounds():
     # Build circuit with 9a encoding and multiple rounds
     circuit = build_circuit_experiment2(rounds=3, cfg=NO_NOISE, encoding_mode='9a')
     
-    # Run simulation with only Z checks
+    # Run simulation with 9a encoding mode
     ec_accept, logical_pass, logical_fail = run_manual_error_correction_exp2(
-        circuit, shots=100, rounds=3, only_z_checks=True
+        circuit, shots=100, rounds=3, encoding_mode='9a'
     )
     
     # All shots should be accepted

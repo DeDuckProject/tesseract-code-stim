@@ -167,7 +167,7 @@ def verify_final_state(shot_tail, frameX=None, frameZ=None, correct_pauli = True
 
     return successful_checks
 
-def run_manual_error_correction_exp2(circuit, shots, rounds, correct_pauli = True, only_z_checks = False):
+def run_manual_error_correction_exp2(circuit, shots, rounds, correct_pauli = True, encoding_mode = '9b'):
     """
     Runs the full manual error correction simulation with final logical state verification.
     Returns counts of shots that pass error correction and total successful parity checks.
@@ -177,8 +177,12 @@ def run_manual_error_correction_exp2(circuit, shots, rounds, correct_pauli = Tru
         shots: Number of shots to run
         rounds: Number of error correction rounds
         correct_pauli: Whether to apply Pauli frame corrections
-        only_z_checks: If True, only check Z3 and Z5 parity (for 9a encoding with |++0000>)
+        encoding_mode: '9a' or '9b' - determines measurement offset and which parity checks to perform
     """
+    # Calculate parameters based on encoding mode
+    only_z_checks = (encoding_mode == '9a')
+    measurement_offset = 0 if encoding_mode == '9a' else 2
+    
     sampler = circuit.compile_sampler()
     shot_data_all = sampler.sample(shots=shots)
 
@@ -187,8 +191,8 @@ def run_manual_error_correction_exp2(circuit, shots, rounds, correct_pauli = Tru
     total_successful_checks = 0
 
     for shot_data in shot_data_all:
-        # Skip the two ancilla measurements from encoding when processing EC rounds
-        status, frameX, frameZ = process_shot(shot_data, rounds, measurement_offset=2)
+        # Process error correction rounds with appropriate measurement offset
+        status, frameX, frameZ = process_shot(shot_data, rounds, measurement_offset=measurement_offset)
 
         if status == "accept":
             ec_accept += 1

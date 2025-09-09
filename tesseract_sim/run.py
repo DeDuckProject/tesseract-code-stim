@@ -68,11 +68,8 @@ def run_simulation_experiment2(rounds: int, shots: int, cfg: NoiseCfg = NO_NOISE
 
     print(f"--- Running Manual Error Correction Simulation (with Logical Check) ---")
     print(f"Rounds: {rounds}, Shots: {shots}, Encoding: Fig {encoding_mode}")
-
-    # For 9a encoding, we only check Z3 and Z5 since we encode |++0000>
-    only_z_checks = (encoding_mode == '9a')
     
-    return run_manual_error_correction_exp2(circuit, shots=shots, rounds=rounds, correct_pauli=correct_pauli, only_z_checks=only_z_checks)
+    return run_manual_error_correction_exp2(circuit, shots=shots, rounds=rounds, correct_pauli=correct_pauli, encoding_mode=encoding_mode)
 
 
 if __name__ == "__main__":

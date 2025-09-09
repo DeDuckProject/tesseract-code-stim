@@ -33,9 +33,9 @@ def test_single_pauli_error_correction(qubit_index, pauli_gate):
     # Inject the specified Pauli error on the specified qubit
     circuit.append(pauli_gate, [qubit_index])
     
-    # Run simulation with only Z checks (appropriate for 9a encoding |++0000>)
+    # Run simulation with 9a encoding mode (appropriate for |++0000>)
     ec_accept, logical_pass, logical_fail = run_manual_error_correction_exp2(
-        circuit, shots=100, rounds=1, only_z_checks=True
+        circuit, shots=100, rounds=1, encoding_mode='9a'
     )
     
     # All shots should be accepted since single errors are correctable
@@ -62,8 +62,8 @@ def test_no_noise_perfect_state():
     # Build circuit with no noise and no injected errors
     circuit = build_circuit_experiment2(rounds=1, cfg=NO_NOISE, encoding_mode='9a')
     
-    # Run simulation with only Z checks (appropriate for 9a encoding |++0000>)
-    ec_accept, logical_pass, logical_fail = run_manual_error_correction_exp2(circuit, shots=100, rounds=1, only_z_checks=True)
+    # Run simulation with 9a encoding mode (appropriate for |++0000>)
+    ec_accept, logical_pass, logical_fail = run_manual_error_correction_exp2(circuit, shots=100, rounds=1, encoding_mode='9a')
     
     # All shots should be accepted
     assert ec_accept == 100, f"Expected all shots accepted, got {ec_accept}"
@@ -81,8 +81,8 @@ def test_single_x_error_correction():
     # Inject a single X error on qubit 8 (first qubit measured in Z basis)
     circuit.append("X", [8])
     
-    # Run simulation with only Z checks (appropriate for 9a encoding |++0000>)
-    ec_accept, logical_pass, logical_fail = run_manual_error_correction_exp2(circuit, shots=100, rounds=1, only_z_checks=True)
+    # Run simulation with 9a encoding mode (appropriate for |++0000>)
+    ec_accept, logical_pass, logical_fail = run_manual_error_correction_exp2(circuit, shots=100, rounds=1, encoding_mode='9a')
     
     # All shots should be accepted since we only have a correctable error
     assert ec_accept == 100, f"Expected all shots accepted, got {ec_accept}"
@@ -99,8 +99,8 @@ def test_single_z_error_correction():
     # Inject a single Z error on qubit 0 (first qubit measured in X basis)
     circuit.append("Z", [0])
     
-    # Run simulation with only Z checks (appropriate for 9a encoding |++0000>)
-    ec_accept, logical_pass, logical_fail = run_manual_error_correction_exp2(circuit, shots=100, rounds=1, only_z_checks=True)
+    # Run simulation with 9a encoding mode (appropriate for |++0000>)
+    ec_accept, logical_pass, logical_fail = run_manual_error_correction_exp2(circuit, shots=100, rounds=1, encoding_mode='9a')
     
     # All shots should be accepted since we only have a correctable error
     assert ec_accept == 100, f"Expected all shots accepted, got {ec_accept}"
