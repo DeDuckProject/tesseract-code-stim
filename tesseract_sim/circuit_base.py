@@ -65,7 +65,8 @@ def init_circuit(qubits=16, ancillas=0):
     # Adding qubit coordinates metadata for ancillas
     for ancilla in range(ancillas):
         circuit.append_operation("QUBIT_COORDS", [qubits + ancilla], [5, ancilla])
-    
+
+    circuit.append_operation("TICK")
     return circuit
 
 

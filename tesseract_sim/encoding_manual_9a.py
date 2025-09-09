@@ -53,4 +53,6 @@ def encode_manual_fig9a(circuit, cfg: NoiseCfg = NO_NOISE):
     append_2q(circuit, "CNOT", 19, 1, phase="enc", cfg=cfg) # measuring stabilizer
     append_2q(circuit, "CNOT", 19, 2, phase="enc", cfg=cfg) # measuring stabilizer
     append_2q(circuit, "CNOT", 19, 3, phase="enc", cfg=cfg) # measuring stabilizer
-    append_2q(circuit, "CNOT", 19, 18, phase="enc", cfg=cfg) # cnot to flag qubit 
+    append_2q(circuit, "CNOT", 19, 18, phase="enc", cfg=cfg) # cnot to flag qubit
+
+    circuit.append_operation("TICK")

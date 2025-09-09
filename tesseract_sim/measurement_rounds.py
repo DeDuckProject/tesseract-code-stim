@@ -38,7 +38,8 @@ def measure_x_z_stabilizer(circuit, data_qubits, x_ancilla, z_ancilla, cfg: Nois
 
     # In stim, the order of measurements in a single M command matters for rec targeting.
     # M x_ancilla, z_ancilla means x is rec(-2), z is rec(-1)
-    append_2q(circuit, "M", x_ancilla, z_ancilla, phase="ec", cfg=cfg)
+    append_1q(circuit, "M", x_ancilla, phase="ec", cfg=cfg)
+    append_1q(circuit, "M", z_ancilla, phase="ec", cfg=cfg)
 
 
 def error_correction_round_rows(circuit, cfg: NoiseCfg = NO_NOISE):
@@ -65,6 +66,7 @@ def error_correct_manual(circuit, rounds=3, cfg: NoiseCfg = NO_NOISE):
     for i in range(rounds):
         error_correction_round_rows(circuit, cfg=cfg)
         error_correction_round_columns(circuit, cfg=cfg)
+        circuit.append_operation("TICK")
 
 
 def measure_logical_operators_for_8_3_2_color_code(circuit, participating_qubits: list[int], ancillas: list[int], measurement_basis: str,
@@ -113,3 +115,5 @@ def measure_logical_operators_tesseract(circuit, cfg: NoiseCfg = NO_NOISE):
 
     # Measure the bottom half in the Z basis
     measure_logical_operators_for_8_3_2_color_code(circuit, participating_qubits=[8, 9, 10, 11, 12, 13, 14, 15], ancillas=[16, 17], measurement_basis="Z", cfg=cfg)
+
+    circuit.append_operation("TICK")

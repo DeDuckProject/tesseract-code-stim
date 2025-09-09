@@ -82,3 +82,5 @@ def encode_manual_fig9b(circuit, cfg: NoiseCfg = NO_NOISE):
     
     # Encode second block (rows 3,4, qubits 8-15) in |000> state (stays as |000>)
     encode_000_in_8_3_2_color_code(circuit, participating_qubits=[8, 9, 10, 11, 12, 13, 14, 15], ancillas=[16, 17], cfg=cfg)
+
+    circuit.append_operation("TICK")
