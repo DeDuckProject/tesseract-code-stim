@@ -80,6 +80,41 @@ python -m tesseract_sim.run --help
     python -m tesseract_sim.run --enc-active --enc-rate-1q 0.0 --ec-active --ec-rate-1q 0.0
     ```
 
+### Plotting Results
+
+The `plotting/plot_acceptance_rates.py` script generates acceptance and logical success rate plots from simulation data. It supports different encoding modes and Pauli frame correction settings.
+
+**Example Usages:**
+
+*   **Generate plots with Pauli frame correction enabled and 9a encoding:**
+    ```bash
+    python plotting/plot_acceptance_rates.py --apply_pauli_frame true --encoding-mode 9a
+    ```
+
+*   **Generate plots with Pauli frame correction disabled and 9a encoding:**
+    ```bash
+    python plotting/plot_acceptance_rates.py --apply_pauli_frame false --encoding-mode 9a
+    ```
+
+*   **Generate plots with 9b encoding and custom shot count:**
+    ```bash
+    python plotting/plot_acceptance_rates.py --apply_pauli_frame true --encoding-mode 9b --shots 5000
+    ```
+
+*   **Generate plots with channel noise sweep instead of EC noise:**
+    ```bash
+    python plotting/plot_acceptance_rates.py --apply_pauli_frame true --encoding-mode 9a --sweep-channel-noise
+    ```
+
+*   **Specify custom output directory:**
+    ```bash
+    python plotting/plot_acceptance_rates.py --apply_pauli_frame true --encoding-mode 9a --out-dir ./custom_plots
+    ```
+
+The script generates two types of plots:
+- **Acceptance Rate Plots**: Show how well the error correction accepts states across different noise levels and rounds
+- **Logical Success Rate Plots**: Show the conditional probability of logical success given acceptance
+
 ## License
 
 MIT License 
