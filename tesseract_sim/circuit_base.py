@@ -54,14 +54,19 @@ z_stabilizers = [
 ## Trying to create circuit from tableau based on stabilizer generators
 # In order to encode some codeword in the codespace, I've used this reference:
 # https://quantumcomputing.stackexchange.com/questions/32437/a-simple-way-of-encoding-qubit-in-stabilizer-codes-with-stim
-def init_circuit():
+def init_circuit(qubits=16, ancillas=0):
     circuit = stim.Circuit()
-    # Adding qubit coordinates metadata
-    for qubit in range(16):
+    # Adding qubit coordinates metadata for qubits
+    for qubit in range(qubits):
         x = qubit % 4
         y = qubit // 4
         circuit.append_operation("QUBIT_COORDS", [qubit], [x, y])
-    # print("Initialization complete.")
+    
+    # Adding qubit coordinates metadata for ancillas
+    for ancilla in range(ancillas):
+        circuit.append_operation("QUBIT_COORDS", [qubits + ancilla], [5, ancilla])
+
+    circuit.append_operation("TICK")
     return circuit
 
 
@@ -86,15 +91,15 @@ def channel(circuit, error_rate, noisy_qubits=list(range(16)), noise_type="X_ERR
     circuit.append("TICK")
     # print("Noise channel applied.")
 
-def channel_erasure_errors(circuit, error_rate, noisy_qubits=list(range(16))):
-    # Noise channel: Adding X errors with probability 0 (for testing, can be adjusted)
-    circuit.append("TICK")
-    # TODO how?
-    # Reference for erasure errors in Stim: https://quantumcomputing.stackexchange.com/questions/26582/how-do-i-perform-an-erasure-error-in-stim/33887#33887
-    circuit.append("DEPOLARIZE1", noisy_qubits, 0.75)  # 10% error probability for demonstration
-    circuit.append("HERALDED_ERASE", noisy_qubits, 0.75)  # 10% error probability for demonstration
-    circuit.append("TICK")
-    # print("Noise channel applied.")
+# def channel_erasure_errors(circuit, error_rate, noisy_qubits=list(range(16))):
+#     # Noise channel: Adding X errors with probability 0 (for testing, can be adjusted)
+#     circuit.append("TICK")
+#     # TODO how?
+#     # Reference for erasure errors in Stim: https://quantumcomputing.stackexchange.com/questions/26582/how-do-i-perform-an-erasure-error-in-stim/33887#33887
+#     circuit.append("DEPOLARIZE1", noisy_qubits, 0.75)  # 10% error probability for demonstration
+#     circuit.append("HERALDED_ERASE", noisy_qubits, 0.75)  # 10% error probability for demonstration
+#     circuit.append("TICK")
+#     # print("Noise channel applied.")
 
 
 def error_correction(circuit):
