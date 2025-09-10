@@ -5,28 +5,9 @@ from .circuit_base import init_circuit, channel
 from .encoding_manual_9a import encode_manual_fig9a
 from typing import Literal
 from .measurement_rounds import error_correct_manual, measure_logical_operators_tesseract
-from .decoder_manual import run_manual_error_correction, run_manual_error_correction_exp2
+from .decoder_manual import run_manual_error_correction_exp2
 from .noise_cfg import NoiseCfg, NO_NOISE
 
-def build_circuit_experiment1(rounds: int, cfg: NoiseCfg = NO_NOISE):
-    # Here we start with the endocding of the state |++0000> as in Fig 9a, we there apply error correction rounds
-    # and calculate the acceptance rate without measuring the qubits at the end.
-
-    # We start with a fresh circuit
-    circuit = init_circuit(qubits=16, ancillas=2)
-
-    # First, prepare a valid encoded state
-    encode_manual_fig9a(circuit, cfg=cfg)
-    # -----------------------------
-
-    if cfg.channel_noise_level > 0:
-        # Now, apply noise to the encoded state
-        channel(circuit, cfg.channel_noise_level, noise_type=cfg.channel_noise_type)
-
-    # Append the error correction rounds to the circuit
-    error_correct_manual(circuit, rounds=rounds, cfg=cfg)
-    
-    return circuit
 
 def build_circuit_experiment2(rounds: int, cfg: NoiseCfg = NO_NOISE, encoding_mode: Literal['9a', '9b'] = '9b'):
     # Here we can use either Fig 9a encoding (|++0000>) or Fig 9b encoding (|+0+0+0>)
@@ -55,13 +36,6 @@ def build_circuit_experiment2(rounds: int, cfg: NoiseCfg = NO_NOISE, encoding_mo
 
     return circuit
 
-def run_simulation_experiment1(rounds: int, shots: int, cfg: NoiseCfg = NO_NOISE):
-    circuit = build_circuit_experiment1(rounds, cfg)
-    
-    print(f"--- Running Manual Error Correction Simulation (Corrected) ---")
-    print(f"Rounds: {rounds}, Shots: {shots}")
-    
-    return run_manual_error_correction(circuit, shots=shots, rounds=rounds)
 
 def run_simulation_experiment2(rounds: int, shots: int, cfg: NoiseCfg = NO_NOISE, correct_pauli = True, encoding_mode: Literal['9a', '9b'] = '9b'):
     circuit = build_circuit_experiment2(rounds, cfg, encoding_mode=encoding_mode)
@@ -103,6 +77,8 @@ if __name__ == "__main__":
     )
 
     if args.experiment == 1:
-        run_simulation_experiment1(rounds=args.rounds, shots=args.shots, cfg=sim_cfg)
+        # Experiment 1 has been removed - use experiment 2 with correct_pauli=False for similar behavior
+        print("Note: Experiment 1 has been removed. Running experiment 2 with correct_pauli=False instead.")
+        run_simulation_experiment2(rounds=args.rounds, shots=args.shots, cfg=sim_cfg, correct_pauli=False, encoding_mode='9a')
     else:
         run_simulation_experiment2(rounds=args.rounds, shots=args.shots, cfg=sim_cfg, correct_pauli=args.correct_pauli, encoding_mode=args.encoding_mode)

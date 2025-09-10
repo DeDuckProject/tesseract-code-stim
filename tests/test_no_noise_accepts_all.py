@@ -1,14 +1,18 @@
-from tesseract_sim import run_simulation_experiment1
+from tesseract_sim import run_simulation_experiment2
 from tesseract_sim.noise_cfg import NO_NOISE
 
 def test_no_noise_accepts_all():
     """
     Given no noise, the simulation should accept all shots.
     """
-    accept_count, reject_count = run_simulation_experiment1(
+    ec_accept, logical_pass, logical_fail = run_simulation_experiment2(
         rounds=1, 
         shots=100, 
-        cfg=NO_NOISE
+        cfg=NO_NOISE,
+        correct_pauli=False,  # Use False to match experiment1 behavior
+        encoding_mode='9a'    # Use 9a to match experiment1 behavior
     )
-    assert reject_count == 0
-    assert accept_count == 100 
+    assert ec_accept == 100
+    # With no noise, all accepted shots should pass logical checks
+    assert logical_pass == 100
+    assert logical_fail == 0 

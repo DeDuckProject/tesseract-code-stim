@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from tesseract_sim.run import run_simulation_experiment1, run_simulation_experiment2
+from tesseract_sim.run import run_simulation_experiment2
 from tesseract_sim.noise_cfg import NoiseCfg
 import os
 from typing import Callable, Dict, List, Any, TypeVar, Tuple, Literal
@@ -68,40 +68,6 @@ def plot_curve(
     print(f"Plot saved to {out_path}")
     plt.close()
 
-def plot_experiment1(
-    rounds: List[int],
-    noise_levels: List[float],
-    shots: int,
-    out_dir: str,
-    correct_pauli: bool = True,
-    sweep_channel_noise: bool = False
-) -> None:
-    """Plots acceptance rates for experiment 1."""
-    # One sweep collecting full results
-    if sweep_channel_noise:
-        cfg_builder = lambda noise: NoiseCfg(ec_active=False, channel_noise_level=noise, channel_noise_type="DEPOLARIZE1")
-    else:
-        cfg_builder = lambda noise: NoiseCfg(ec_active=True, ec_rate_1q=noise, ec_rate_2q=noise, channel_noise_level=0.0)
-    
-    raw_results = sweep_results(
-        run_simulation_experiment1,
-        rounds, noise_levels, shots,
-        cfg_builder,
-        correct_pauli=correct_pauli
-    )
-
-    # Derive acceptance rate from raw results
-    data = {
-        noise: [t[0]/shots for t in tuples]  # accept_count/shots
-        for noise, tuples in raw_results.items()
-    }
-
-    plot_curve(
-        rounds, data,
-        title="EC Acceptance vs Rounds (Experiment 1)",
-        ylabel="Acceptance Rate",
-        out_path=os.path.join(out_dir, 'acceptance_rates_ec_noise_exp1.png')
-    )
 
 def plot_experiment2(
     rounds: List[int],
@@ -159,8 +125,8 @@ def plot_experiment2(
 
 def main():
     parser = argparse.ArgumentParser(description="Generate acceptance rate plots for tesseract experiments")
-    parser.add_argument('--experiments', type=int, nargs='+', choices=[1, 2], default=[1, 2],
-                      help='Which experiments to plot (1, 2, or both)')
+    parser.add_argument('--experiments', type=int, nargs='+', choices=[2], default=[2],
+                      help='Which experiments to plot (currently only 2 is supported)')
     parser.add_argument('--shots', type=int, default=10000,
                       help='Number of shots per data point')
     parser.add_argument('--out-dir', type=str, default='../plots',
@@ -177,9 +143,6 @@ def main():
     os.makedirs(args.out_dir, exist_ok=True)
 
     print(args.experiments)
-    # Temp disable experiment1
-    # if 1 in args.experiments:
-    #     plot_experiment1(rounds, noise_levels, args.shots, args.out_dir, args.correct_pauli, args.sweep_channel_noise)
     if 2 in args.experiments:
         plot_experiment2(rounds, noise_levels, args.shots, args.out_dir, args.correct_pauli, args.encoding_mode, args.sweep_channel_noise)
 

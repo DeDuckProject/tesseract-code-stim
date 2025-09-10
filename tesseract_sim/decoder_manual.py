@@ -69,29 +69,6 @@ def process_shot(shot_data, rounds, measurement_offset=0):
     return "accept", frameX, frameZ
 
 
-def run_manual_error_correction(circuit, shots, rounds):
-    """
-    Runs the full manual error correction simulation.
-    """
-    sampler = circuit.compile_sampler()
-    shot_data_all = sampler.sample(shots=shots)
-    
-    accept_count = 0
-    reject_count = 0
-    
-    for i in range(shots):
-        shot_data = shot_data_all[i]
-        status, _, _ = process_shot(shot_data, rounds)
-        if status == "accept":
-            accept_count += 1
-        else:
-            reject_count += 1
-            
-    print(f"Accepted: {accept_count}/{shots}")
-    print(f"Rejected: {reject_count}/{shots}")
-    print(f"Acceptance Rate: {accept_count/shots:.2%}")
-
-    return accept_count, reject_count 
 
 def verify_final_state(shot_tail, frameX=None, frameZ=None, correct_pauli = True, only_z_checks = False):
     """
