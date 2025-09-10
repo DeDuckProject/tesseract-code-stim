@@ -5,11 +5,11 @@ from .circuit_base import init_circuit, channel
 from .encoding_manual_9a import encode_manual_fig9a
 from typing import Literal
 from .measurement_rounds import error_correct_manual, measure_logical_operators_tesseract
-from .decoder_manual import run_manual_error_correction_exp2
+from .decoder_manual import run_manual_error_correction
 from .noise_cfg import NoiseCfg, NO_NOISE
 
 
-def build_circuit_experiment2(rounds: int, cfg: NoiseCfg = NO_NOISE, encoding_mode: Literal['9a', '9b'] = '9b'):
+def build_circuit_ec_experiment(rounds: int, cfg: NoiseCfg = NO_NOISE, encoding_mode: Literal['9a', '9b'] = '9b'):
     # Here we can use either Fig 9a encoding (|++0000>) or Fig 9b encoding (|+0+0+0>)
     # depending on the encoding_mode parameter.
 
@@ -37,13 +37,13 @@ def build_circuit_experiment2(rounds: int, cfg: NoiseCfg = NO_NOISE, encoding_mo
     return circuit
 
 
-def run_simulation_experiment2(rounds: int, shots: int, cfg: NoiseCfg = NO_NOISE, correct_pauli = True, encoding_mode: Literal['9a', '9b'] = '9b'):
-    circuit = build_circuit_experiment2(rounds, cfg, encoding_mode=encoding_mode)
+def run_simulation_ec_experiment(rounds: int, shots: int, cfg: NoiseCfg = NO_NOISE, correct_pauli = True, encoding_mode: Literal['9a', '9b'] = '9b'):
+    circuit = build_circuit_ec_experiment(rounds, cfg, encoding_mode=encoding_mode)
 
     print(f"--- Running Manual Error Correction Simulation (with Logical Check) ---")
     print(f"Rounds: {rounds}, Shots: {shots}, Encoding: Fig {encoding_mode}")
     
-    return run_manual_error_correction_exp2(circuit, shots=shots, rounds=rounds, correct_pauli=correct_pauli, encoding_mode=encoding_mode)
+    return run_manual_error_correction(circuit, shots=shots, rounds=rounds, correct_pauli=correct_pauli, encoding_mode=encoding_mode)
 
 
 if __name__ == "__main__":
@@ -58,7 +58,7 @@ if __name__ == "__main__":
     parser.add_argument("--ec-rate-2q", type=float, default=0.0, help="2-qubit noise rate for error correction.")
     parser.add_argument("--channel-noise-level", type=float, default=0.0, help="Channel noise level between encoding and error correction.")
     parser.add_argument("--channel-noise-type", type=str, default="DEPOLARIZE1", help="Channel noise type (e.g., DEPOLARIZE1, X_ERROR, Z_ERROR).")
-    parser.add_argument("--experiment", type=int, choices=[1, 2], default=1, help="Which experiment to run (1 or 2)")
+    parser.add_argument("--experiment", type=int, choices=[1], default=1, help="Which experiment to run (only 1 available)")
     parser.add_argument("--no-correct-pauli", action="store_false", dest="correct_pauli", help="Disable Pauli frame corrections during logical verification")
     parser.add_argument("--encoding-mode", type=str, choices=['9a', '9b'], default='9b', help="Encoding mode")
     
@@ -76,9 +76,5 @@ if __name__ == "__main__":
         channel_noise_type=args.channel_noise_type
     )
 
-    if args.experiment == 1:
-        # Experiment 1 has been removed - use experiment 2 with correct_pauli=False for similar behavior
-        print("Note: Experiment 1 has been removed. Running experiment 2 with correct_pauli=False instead.")
-        run_simulation_experiment2(rounds=args.rounds, shots=args.shots, cfg=sim_cfg, correct_pauli=False, encoding_mode='9a')
-    else:
-        run_simulation_experiment2(rounds=args.rounds, shots=args.shots, cfg=sim_cfg, correct_pauli=args.correct_pauli, encoding_mode=args.encoding_mode)
+
+    run_simulation_ec_experiment(rounds=args.rounds, shots=args.shots, cfg=sim_cfg, correct_pauli=args.correct_pauli, encoding_mode=args.encoding_mode)

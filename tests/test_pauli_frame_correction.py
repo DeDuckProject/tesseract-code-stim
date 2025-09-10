@@ -1,8 +1,8 @@
 import stim
 import numpy as np
 import pytest
-from tesseract_sim.run import build_circuit_experiment2
-from tesseract_sim.decoder_manual import run_manual_error_correction_exp2
+from tesseract_sim.run import build_circuit_ec_experiment
+from tesseract_sim.decoder_manual import run_manual_error_correction
 from tesseract_sim.noise_cfg import NO_NOISE
 
 # TODO these tests are not working correctly for 9b encoding/measurement. need to fix that with 9b and without the only_z_checks flag.
@@ -28,13 +28,13 @@ def test_single_pauli_error_correction(qubit_index, pauli_gate):
     3. No logical failures occur (logical_fail = 0%)
     """
     # Build circuit with no noise during encoding/EC
-    circuit = build_circuit_experiment2(rounds=1, cfg=NO_NOISE, encoding_mode='9a')
+    circuit = build_circuit_ec_experiment(rounds=1, cfg=NO_NOISE, encoding_mode='9a')
     
     # Inject the specified Pauli error on the specified qubit
     circuit.append(pauli_gate, [qubit_index])
     
     # Run simulation with 9a encoding mode (appropriate for |++0000>)
-    ec_accept, logical_pass, logical_fail = run_manual_error_correction_exp2(
+    ec_accept, logical_pass, logical_fail = run_manual_error_correction(
         circuit, shots=100, rounds=1, encoding_mode='9a'
     )
     
@@ -60,10 +60,10 @@ def test_single_pauli_error_correction(qubit_index, pauli_gate):
 def test_no_noise_perfect_state():
     """Test that with no noise at all, we get perfect acceptance and logical pass rates."""
     # Build circuit with no noise and no injected errors
-    circuit = build_circuit_experiment2(rounds=1, cfg=NO_NOISE, encoding_mode='9a')
+    circuit = build_circuit_ec_experiment(rounds=1, cfg=NO_NOISE, encoding_mode='9a')
     
     # Run simulation with 9a encoding mode (appropriate for |++0000>)
-    ec_accept, logical_pass, logical_fail = run_manual_error_correction_exp2(circuit, shots=100, rounds=1, encoding_mode='9a')
+    ec_accept, logical_pass, logical_fail = run_manual_error_correction(circuit, shots=100, rounds=1, encoding_mode='9a')
     
     # All shots should be accepted
     assert ec_accept == 100, f"Expected all shots accepted, got {ec_accept}"
@@ -76,13 +76,13 @@ def test_no_noise_perfect_state():
 def test_single_x_error_correction():
     """Test that a single X error on a Z-basis measurement qubit gets corrected by the Pauli frame."""
     # Build circuit with no noise during encoding/EC
-    circuit = build_circuit_experiment2(rounds=1, cfg=NO_NOISE, encoding_mode='9a')
+    circuit = build_circuit_ec_experiment(rounds=1, cfg=NO_NOISE, encoding_mode='9a')
     
     # Inject a single X error on qubit 8 (first qubit measured in Z basis)
     circuit.append("X", [8])
     
     # Run simulation with 9a encoding mode (appropriate for |++0000>)
-    ec_accept, logical_pass, logical_fail = run_manual_error_correction_exp2(circuit, shots=100, rounds=1, encoding_mode='9a')
+    ec_accept, logical_pass, logical_fail = run_manual_error_correction(circuit, shots=100, rounds=1, encoding_mode='9a')
     
     # All shots should be accepted since we only have a correctable error
     assert ec_accept == 100, f"Expected all shots accepted, got {ec_accept}"
@@ -94,13 +94,13 @@ def test_single_x_error_correction():
 def test_single_z_error_correction():
     """Test that a single Z error on an X-basis measurement qubit gets corrected by the Pauli frame."""
     # Build circuit with no noise during encoding/EC
-    circuit = build_circuit_experiment2(rounds=1, cfg=NO_NOISE, encoding_mode='9a')
+    circuit = build_circuit_ec_experiment(rounds=1, cfg=NO_NOISE, encoding_mode='9a')
     
     # Inject a single Z error on qubit 0 (first qubit measured in X basis)
     circuit.append("Z", [0])
     
     # Run simulation with 9a encoding mode (appropriate for |++0000>)
-    ec_accept, logical_pass, logical_fail = run_manual_error_correction_exp2(circuit, shots=100, rounds=1, encoding_mode='9a')
+    ec_accept, logical_pass, logical_fail = run_manual_error_correction(circuit, shots=100, rounds=1, encoding_mode='9a')
     
     # All shots should be accepted since we only have a correctable error
     assert ec_accept == 100, f"Expected all shots accepted, got {ec_accept}"

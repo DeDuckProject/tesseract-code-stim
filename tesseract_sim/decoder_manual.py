@@ -144,7 +144,7 @@ def verify_final_state(shot_tail, frameX=None, frameZ=None, correct_pauli = True
 
     return successful_checks
 
-def run_manual_error_correction_exp2(circuit, shots, rounds, correct_pauli = True, encoding_mode = '9b'):
+def run_manual_error_correction(circuit, shots, rounds, correct_pauli = True, encoding_mode ='9b'):
     """
     Runs the full manual error correction simulation with final logical state verification.
     Returns counts of shots that pass error correction and total successful parity checks.

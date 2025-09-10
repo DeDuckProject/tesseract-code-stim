@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from tesseract_sim.run import run_simulation_experiment2
+from tesseract_sim.run import run_simulation_ec_experiment
 from tesseract_sim.noise_cfg import NoiseCfg
 import os
 from typing import Callable, Dict, List, Any, TypeVar, Tuple, Literal
@@ -69,7 +69,7 @@ def plot_curve(
     plt.close()
 
 
-def plot_experiment2(
+def plot_ec_experiment(
     rounds: List[int],
     noise_levels: List[float],
     shots: int,
@@ -78,7 +78,7 @@ def plot_experiment2(
     encoding_mode: Literal['9a', '9b'] = '9b',
     sweep_channel_noise: bool = False
 ) -> None:
-    """Plots both EC acceptance and logical check rates for experiment 2."""
+    """Plots both EC acceptance and logical check rates for the EC experiment."""
     # One sweep collecting full results
     if sweep_channel_noise:
         cfg_builder = lambda noise: NoiseCfg(ec_active=False, channel_noise_level=noise, channel_noise_type="DEPOLARIZE1")
@@ -86,7 +86,7 @@ def plot_experiment2(
         cfg_builder = lambda noise: NoiseCfg(ec_active=True, ec_rate_1q=noise, ec_rate_2q=noise, channel_noise_level=0.0)
     
     raw_results = sweep_results(
-        run_simulation_experiment2,
+        run_simulation_ec_experiment,
         rounds, noise_levels, shots,
         cfg_builder,
         correct_pauli=correct_pauli,
@@ -102,9 +102,9 @@ def plot_experiment2(
     noise_type = "Channel" if sweep_channel_noise else "EC"
     plot_curve(
         rounds, ec_data,
-        title=f"{noise_type} Acceptance vs Rounds (Experiment 2)",
+        title=f"{noise_type} Acceptance vs Rounds (EC Experiment)",
         ylabel="EC Acceptance Rate",
-        out_path=os.path.join(out_dir, f'acceptance_rates_{"channel" if sweep_channel_noise else "ec"}_noise_exp2.png')
+        out_path=os.path.join(out_dir, f'acceptance_rates_{"channel" if sweep_channel_noise else "ec"}_noise_ec_experiment.png')
     )
 
     # Derive logical check rate from same raw results - normalized by acceptance
@@ -118,9 +118,9 @@ def plot_experiment2(
 
     plot_curve(
         rounds, logical_data,
-        title=f"Logical Check Success vs Rounds (Experiment 2) - {noise_type} Noise",
+        title=f"Logical Check Success vs Rounds (EC Experiment) - {noise_type} Noise",
         ylabel="Logical Success Rate | Accepted",
-        out_path=os.path.join(out_dir, f'logical_rates_{"channel" if sweep_channel_noise else "ec"}_noise_exp2.png')
+        out_path=os.path.join(out_dir, f'logical_rates_{"channel" if sweep_channel_noise else "ec"}_noise_ec_experiment.png')
     )
 
 def main():
@@ -144,7 +144,7 @@ def main():
 
     print(args.experiments)
     if 2 in args.experiments:
-        plot_experiment2(rounds, noise_levels, args.shots, args.out_dir, args.correct_pauli, args.encoding_mode, args.sweep_channel_noise)
+        plot_ec_experiment(rounds, noise_levels, args.shots, args.out_dir, args.correct_pauli, args.encoding_mode, args.sweep_channel_noise)
 
 if __name__ == "__main__":
     main() 
