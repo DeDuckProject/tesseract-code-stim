@@ -37,13 +37,13 @@ def build_circuit_ec_experiment(rounds: int, cfg: NoiseCfg = NO_NOISE, encoding_
     return circuit
 
 
-def run_simulation_ec_experiment(rounds: int, shots: int, cfg: NoiseCfg = NO_NOISE, correct_pauli = True, encoding_mode: Literal['9a', '9b'] = '9b'):
+def run_simulation_ec_experiment(rounds: int, shots: int, cfg: NoiseCfg = NO_NOISE, apply_pauli_frame = True, encoding_mode: Literal['9a', '9b'] = '9b'):
     circuit = build_circuit_ec_experiment(rounds, cfg, encoding_mode=encoding_mode)
 
     print(f"--- Running Manual Error Correction Simulation (with Logical Check) ---")
     print(f"Rounds: {rounds}, Shots: {shots}, Encoding: Fig {encoding_mode}")
     
-    return run_manual_error_correction(circuit, shots=shots, rounds=rounds, correct_pauli=correct_pauli, encoding_mode=encoding_mode)
+    return run_manual_error_correction(circuit, shots=shots, rounds=rounds, apply_pauli_frame=apply_pauli_frame, encoding_mode=encoding_mode)
 
 
 if __name__ == "__main__":
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     parser.add_argument("--channel-noise-level", type=float, default=0.0, help="Channel noise level between encoding and error correction.")
     parser.add_argument("--channel-noise-type", type=str, default="DEPOLARIZE1", help="Channel noise type (e.g., DEPOLARIZE1, X_ERROR, Z_ERROR).")
     parser.add_argument("--experiment", type=int, choices=[1], default=1, help="Which experiment to run (only 1 available)")
-    parser.add_argument("--no-correct-pauli", action="store_false", dest="correct_pauli", help="Disable Pauli frame corrections during logical verification")
+    parser.add_argument("--no-apply-pauli-frame", action="store_false", dest="apply_pauli_frame", help="Disable Pauli frame corrections during logical verification")
     parser.add_argument("--encoding-mode", type=str, choices=['9a', '9b'], default='9b', help="Encoding mode")
     
     args = parser.parse_args()
@@ -77,4 +77,4 @@ if __name__ == "__main__":
     )
 
 
-    run_simulation_ec_experiment(rounds=args.rounds, shots=args.shots, cfg=sim_cfg, correct_pauli=args.correct_pauli, encoding_mode=args.encoding_mode)
+    run_simulation_ec_experiment(rounds=args.rounds, shots=args.shots, cfg=sim_cfg, apply_pauli_frame=args.apply_pauli_frame, encoding_mode=args.encoding_mode)

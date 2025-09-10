@@ -70,7 +70,7 @@ def process_shot(shot_data, rounds, measurement_offset=0):
 
 
 
-def verify_final_state(shot_tail, frameX=None, frameZ=None, correct_pauli = True, only_z_checks = False):
+def verify_final_state(shot_tail, frameX=None, frameZ=None, apply_pauli_frame = True, only_z_checks = False):
     """
     Verifies the final state measurements of both 8-3-2 color codes.
 
@@ -97,7 +97,7 @@ def verify_final_state(shot_tail, frameX=None, frameZ=None, correct_pauli = True
         shot_tail: Last 16 measurements from the shot data (8 X measurements followed by 8 Z measurements)
         frameX: Array of X-basis Pauli frame corrections
         frameZ: Array of Z-basis Pauli frame corrections
-        correct_pauli: True if the Pauli frame corrections should be applied, False otherwise
+        apply_pauli_frame: True if the Pauli frame corrections should be applied, False otherwise
         only_z_checks: If True, only check Z₃ and Z₅ parity (for 9a encoding with |++0000>)
     Returns:
         int: Number of successful parity checks (0-2 if only_z_checks, 0-4 otherwise)
@@ -105,7 +105,7 @@ def verify_final_state(shot_tail, frameX=None, frameZ=None, correct_pauli = True
     # Make a copy to avoid modifying the original data
     corrected = shot_tail.copy()
     
-    if correct_pauli:
+    if apply_pauli_frame:
         if frameX is not None and frameZ is not None:
             # Top half measured in X basis - apply X frame corrections (only LSB matters)
             for i in range(8):
@@ -144,7 +144,7 @@ def verify_final_state(shot_tail, frameX=None, frameZ=None, correct_pauli = True
 
     return successful_checks
 
-def run_manual_error_correction(circuit, shots, rounds, correct_pauli = True, encoding_mode ='9b'):
+def run_manual_error_correction(circuit, shots, rounds, apply_pauli_frame = True, encoding_mode ='9b'):
     """
     Runs the full manual error correction simulation with final logical state verification.
     Returns counts of shots that pass error correction and total successful parity checks.
@@ -153,7 +153,7 @@ def run_manual_error_correction(circuit, shots, rounds, correct_pauli = True, en
         circuit: The quantum circuit to simulate
         shots: Number of shots to run
         rounds: Number of error correction rounds
-        correct_pauli: Whether to apply Pauli frame corrections
+        apply_pauli_frame: Whether to apply Pauli frame corrections
         encoding_mode: '9a' or '9b' - determines measurement offset and which parity checks to perform
     """
     # Calculate parameters based on encoding mode
@@ -174,7 +174,7 @@ def run_manual_error_correction(circuit, shots, rounds, correct_pauli = True, en
         if status == "accept":
             ec_accept += 1
             # For accepted shots, count successful parity checks
-            successful_checks = verify_final_state(shot_data[-16:], frameX, frameZ, correct_pauli, only_z_checks)
+            successful_checks = verify_final_state(shot_data[-16:], frameX, frameZ, apply_pauli_frame, only_z_checks)
             total_successful_checks += successful_checks
             
             # Count shots where all parity checks pass
@@ -186,7 +186,7 @@ def run_manual_error_correction(circuit, shots, rounds, correct_pauli = True, en
     max_checks = 2 if only_z_checks else 4
     normalized_logical_rate = total_successful_checks / (shots * max_checks) if shots > 0 else 0
 
-    print(f"Correcting by Pauli frame → {correct_pauli}")
+    print(f"Correcting by Pauli frame → {apply_pauli_frame}")
     print(f"After EC rounds → {ec_accept}/{shots} accepted")
     checks_desc = "Z3,Z5" if only_z_checks else "X4,X6,Z3,Z5"
     print(f"Total successful parity checks ({checks_desc}) → {total_successful_checks}/{shots * max_checks}")

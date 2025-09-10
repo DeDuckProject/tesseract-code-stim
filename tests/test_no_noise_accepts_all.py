@@ -9,7 +9,7 @@ def test_no_noise_accepts_all():
         rounds=1, 
         shots=100, 
         cfg=NO_NOISE,
-        correct_pauli=False,  # Use False to match experiment1 behavior
+        apply_pauli_frame=False,  # Use False to match experiment1 behavior
         encoding_mode='9a'    # Use 9a to match experiment1 behavior
     )
     assert ec_accept == 100

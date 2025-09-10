@@ -14,7 +14,7 @@ def sweep_results(
     noise_levels: List[float],
     shots: int,
     cfg_builder: Callable[[float], NoiseCfg],
-    correct_pauli: bool = True,
+    apply_pauli_frame: bool = True,
     encoding_mode: Literal['9a', '9b'] = '9b'
 ) -> Dict[float, List[T]]:
     """
@@ -38,7 +38,7 @@ def sweep_results(
 
         for r in rounds:
             print(f"Processing rounds={r}, noise={noise}")
-            result = experiment_fn(rounds=r, shots=shots, cfg=noise_config, correct_pauli=correct_pauli, encoding_mode=encoding_mode)
+            result = experiment_fn(rounds=r, shots=shots, cfg=noise_config, apply_pauli_frame=apply_pauli_frame, encoding_mode=encoding_mode)
             tuples.append(result)
 
         results[noise] = tuples
@@ -74,7 +74,7 @@ def plot_ec_experiment(
     noise_levels: List[float],
     shots: int,
     out_dir: str,
-    correct_pauli: bool = True,
+    apply_pauli_frame: bool = True,
     encoding_mode: Literal['9a', '9b'] = '9b',
     sweep_channel_noise: bool = False
 ) -> None:
@@ -89,7 +89,7 @@ def plot_ec_experiment(
         run_simulation_ec_experiment,
         rounds, noise_levels, shots,
         cfg_builder,
-        correct_pauli=correct_pauli,
+        apply_pauli_frame=apply_pauli_frame,
         encoding_mode=encoding_mode
     )
 
@@ -131,7 +131,7 @@ def main():
                       help='Number of shots per data point')
     parser.add_argument('--out-dir', type=str, default='../plots',
                       help='Output directory for plots')
-    parser.add_argument('--correct-pauli', type=bool, default=False, help='Correct the Pauli frame')
+    parser.add_argument('--apply_pauli_frame', type=bool, default=False, help='Perform final correction - apply the measured Pauli frame. The error correction rounds and measurements (besides the actual correction at the end) happen regardless, based on the number of rounds.')
     parser.add_argument('--encoding-mode', type=str, choices=['9a', '9b'], default='9a', help='Encoding mode')
     parser.add_argument('--sweep-channel-noise', action='store_true', help='Sweep channel noise instead of EC noise')
     args = parser.parse_args()
@@ -144,7 +144,7 @@ def main():
 
     print(args.experiments)
     if 2 in args.experiments:
-        plot_ec_experiment(rounds, noise_levels, args.shots, args.out_dir, args.correct_pauli, args.encoding_mode, args.sweep_channel_noise)
+        plot_ec_experiment(rounds, noise_levels, args.shots, args.out_dir, args.apply_pauli_frame, args.encoding_mode, args.sweep_channel_noise)
 
 if __name__ == "__main__":
     main() 

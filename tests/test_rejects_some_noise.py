@@ -12,7 +12,7 @@ def test_rejects_some_noise():
         rounds=2,
         shots=1000,
         cfg=noise_config,
-        correct_pauli=False,  # Use False to match experiment1 behavior
+        apply_pauli_frame=False,  # Use False to match experiment1 behavior
         encoding_mode='9a'    # Use 9a to match experiment1 behavior
     )
     reject_count = 1000 - ec_accept

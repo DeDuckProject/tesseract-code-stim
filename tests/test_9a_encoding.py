@@ -43,7 +43,7 @@ def test_9a_encoding_without_pauli_correction():
     
     # Run simulation without Pauli correction
     ec_accept, logical_pass, logical_fail = run_manual_error_correction(
-        circuit, shots=100, rounds=1, correct_pauli=False, encoding_mode='9a'
+        circuit, shots=100, rounds=1, apply_pauli_frame=False, encoding_mode='9a'
     )
     
     # All shots should be accepted
