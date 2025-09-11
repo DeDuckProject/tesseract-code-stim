@@ -133,7 +133,7 @@ def main():
                       help='Output directory for plots')
     parser.add_argument('--apply_pauli_frame', type=bool, default=False, help='Perform final correction - apply the measured Pauli frame. The error correction rounds and measurements (besides the actual correction at the end) happen regardless, based on the number of rounds.')
     parser.add_argument('--encoding-mode', type=str, choices=['9a', '9b'], default='9a', help='Encoding mode')
-    parser.add_argument('--sweep-channel-noise', action='store_true', help='Sweep channel noise instead of EC noise')
+    parser.add_argument('--sweep-channel-noise', action='store_true', help='Sweep channel noise instead of EC noise. Channel noise acts once after encoding and before the error correction rounds.')
     args = parser.parse_args()
 
     # Combine detailed lower rounds with higher rounds

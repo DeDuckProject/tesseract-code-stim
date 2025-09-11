@@ -1,13 +1,12 @@
 # Tesseract Code
 
-This repository contains implementations and simulations of the Tesseract quantum error correction code using Stim and PyMatching.
+This repository contains implementations and simulations of the Tesseract quantum error correction code [[1]](#references) using Stim [[3]](#references).
 
 ## Features
 
-- Circuit implementation of the Tesseract code
-- Error simulation and correction
-- Jupyter notebooks with various experiments and visualizations
-- Utility functions for circuit manipulation and analysis
+- Circuit implementation of the [[16,4,4]] Tesseract subsystem color code [[2]](#references) in Stim, including encoding, error correction rounds and final measurements.
+- Simulation of an error correction experiment with configurable noise setting, rounds, shot and more.
+- Plotting: sweeping of different parameters and obtaining acceptance rate and logical success rate.
 
 ## Installation
 
@@ -26,14 +25,7 @@ pip install -r requirements.txt
 
 ## Structure
 
-- `circuit_commons.py`: Core circuit components and helper functions
-- `stim_simulation_utils.py`: Simulation and plotting utilities
-- `stim_utils.py`: Stim-specific helper functions
-- Notebooks:
-  - `01_stim_playground.ipynb`: Initial Stim experiments
-  - `03_tesseract_stim_simulation_pymatching.ipynb`: Main simulation with PyMatching
-  - `04_stim_example_5_qubit_code.ipynb`: Five-qubit code reference
-  - And more...
+TODO - fill in.
 
 ## Usage
 
@@ -45,9 +37,9 @@ jupyter notebook
 
 Then navigate to one of the notebooks to run experiments and simulations.
 
-### Running Simulations with Noise
+### Running Simulations
 
-The `tesseract_sim/run.py` script now supports configurable noise injection during encoding and error correction phases. You can control whether noise is active and set independent 1-qubit and 2-qubit error rates for each phase.
+The `tesseract_sim/run.py` script supports configurable noise injection during encoding and error correction phases. You can control whether noise is active and set independent 1-qubit and 2-qubit error rates for each phase.
 
 ```bash
 python -m tesseract_sim.run --help
@@ -114,6 +106,14 @@ The `plotting/plot_acceptance_rates.py` script generates acceptance and logical 
 The script generates two types of plots:
 - **Acceptance Rate Plots**: Show how well the error correction accepts states across different noise levels and rounds
 - **Logical Success Rate Plots**: Show the conditional probability of logical success given acceptance
+
+## References
+
+[1] B. W. Reichardt et al., "Demonstration of quantum computation and error correction with a tesseract code", (2024) [arXiv:2409.04628](https://arxiv.org/abs/2409.04628)
+
+[2] "\([[16,6,4]]\) Tesseract color code", The Error Correction Zoo (V. V. Albert & P. Faist, eds.), 2024. https://errorcorrectionzoo.org/c/stab_16_6_4
+
+[3] C. Gidney, "Stim: a fast stabilizer circuit simulator", Quantum 5, 497 (2021). https://doi.org/10.22331/q-2021-07-06-497
 
 ## License
 

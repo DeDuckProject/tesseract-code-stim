@@ -60,7 +60,7 @@ if __name__ == "__main__":
     parser.add_argument("--channel-noise-type", type=str, default="DEPOLARIZE1", help="Channel noise type (e.g., DEPOLARIZE1, X_ERROR, Z_ERROR).")
     parser.add_argument("--experiment", type=int, choices=[1], default=1, help="Which experiment to run (only 1 available)")
     parser.add_argument("--no-apply-pauli-frame", action="store_false", dest="apply_pauli_frame", help="Disable Pauli frame corrections during logical verification")
-    parser.add_argument("--encoding-mode", type=str, choices=['9a', '9b'], default='9b', help="Encoding mode")
+    parser.add_argument("--encoding-mode", type=str, choices=['9a', '9b'], default='9b', help="Encoding mode, based on Fig 9a or 9b in the paper")
     
     args = parser.parse_args()
 
