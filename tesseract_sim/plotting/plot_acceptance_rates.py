@@ -1,9 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from tesseract_sim.run import run_simulation_ec_experiment
-from tesseract_sim.noise_cfg import NoiseCfg
+from tesseract_sim.noise.noise_cfg import NoiseCfg
 import os
-from typing import Callable, Dict, List, Any, TypeVar, Tuple, Literal
+from typing import Callable, Dict, List, TypeVar, Tuple, Literal
 import argparse
 
 T = TypeVar('T')  # Type of experiment result

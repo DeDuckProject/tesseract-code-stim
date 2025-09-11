@@ -1,9 +1,7 @@
-import stim
-import numpy as np
 import pytest
 from tesseract_sim.run import build_circuit_ec_experiment
-from tesseract_sim.decoder_manual import run_manual_error_correction
-from tesseract_sim.noise_cfg import NO_NOISE
+from tesseract_sim.error_correction.decoder_manual import run_manual_error_correction
+from tesseract_sim.noise.noise_cfg import NO_NOISE
 
 # TODO these tests are not working correctly for 9b encoding/measurement. need to fix that with 9b and without the only_z_checks flag.
 

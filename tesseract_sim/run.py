@@ -1,12 +1,12 @@
 import argparse
 
-from tesseract_sim.encoding_manual_9b import encode_manual_fig9b
-from .circuit_base import init_circuit, channel
-from .encoding_manual_9a import encode_manual_fig9a
+from tesseract_sim.encoding.encoding_manual_9b import encode_manual_fig9b
+from tesseract_sim.common.circuit_base import init_circuit, channel
+from tesseract_sim.encoding.encoding_manual_9a import encode_manual_fig9a
 from typing import Literal
-from .measurement_rounds import error_correct_manual, measure_logical_operators_tesseract
-from .decoder_manual import run_manual_error_correction
-from .noise_cfg import NoiseCfg, NO_NOISE
+from tesseract_sim.error_correction.measurement_rounds import error_correct_manual, measure_logical_operators_tesseract
+from tesseract_sim.error_correction.decoder_manual import run_manual_error_correction
+from tesseract_sim.noise.noise_cfg import NoiseCfg, NO_NOISE
 
 
 def build_circuit_ec_experiment(rounds: int, cfg: NoiseCfg = NO_NOISE, encoding_mode: Literal['9a', '9b'] = '9b'):

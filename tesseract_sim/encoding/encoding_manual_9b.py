@@ -1,5 +1,5 @@
-from tesseract_sim.noise_cfg import NoiseCfg, NO_NOISE
-from tesseract_sim.noise_utils import append_1q, append_2q
+from tesseract_sim.noise.noise_cfg import NoiseCfg, NO_NOISE
+from tesseract_sim.noise.noise_utils import append_1q, append_2q
 
 
 def encode_000_in_8_3_2_color_code(circuit, participating_qubits: list[int], ancillas: list[int], cfg: NoiseCfg = NO_NOISE):

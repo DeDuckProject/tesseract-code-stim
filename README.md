@@ -80,27 +80,27 @@ The `plotting/plot_acceptance_rates.py` script generates acceptance and logical 
 
 *   **Generate plots with Pauli frame correction enabled and 9a encoding:**
     ```bash
-    python plotting/plot_acceptance_rates.py --apply_pauli_frame true --encoding-mode 9a
+    python tesseract_sim/plotting/plot_acceptance_rates.py --apply_pauli_frame true --encoding-mode 9a
     ```
 
 *   **Generate plots with Pauli frame correction disabled and 9a encoding:**
     ```bash
-    python plotting/plot_acceptance_rates.py --apply_pauli_frame false --encoding-mode 9a
+    python tesseract_sim/plotting/plot_acceptance_rates.py --apply_pauli_frame false --encoding-mode 9a
     ```
 
 *   **Generate plots with 9b encoding and custom shot count:**
     ```bash
-    python plotting/plot_acceptance_rates.py --apply_pauli_frame true --encoding-mode 9b --shots 5000
+    python tesseract_sim/plotting/plot_acceptance_rates.py --apply_pauli_frame true --encoding-mode 9b --shots 5000
     ```
 
 *   **Generate plots with channel noise sweep instead of EC noise:**
     ```bash
-    python plotting/plot_acceptance_rates.py --apply_pauli_frame true --encoding-mode 9a --sweep-channel-noise
+    python tesseract_sim/plotting/plot_acceptance_rates.py --apply_pauli_frame true --encoding-mode 9a --sweep-channel-noise
     ```
 
 *   **Specify custom output directory:**
     ```bash
-    python plotting/plot_acceptance_rates.py --apply_pauli_frame true --encoding-mode 9a --out-dir ./custom_plots
+    python tesseract_sim/plotting/plot_acceptance_rates.py --apply_pauli_frame true --encoding-mode 9a --out-dir ./custom_plots
     ```
 
 The script generates two types of plots:

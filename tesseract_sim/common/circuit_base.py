@@ -1,3 +1,5 @@
+from typing_extensions import deprecated
+
 import stim
 
 # general circuit helper functions:
@@ -70,6 +72,7 @@ def init_circuit(qubits=16, ancillas=0):
     return circuit
 
 
+@deprecated("Use encode_manual_fig9a or encode_manual_fig9b instead")
 def encode(circuit):
     # Encoding step: Measuring X and Z stabilizers:
 
@@ -89,19 +92,8 @@ def channel(circuit, error_rate, noisy_qubits=list(range(16)), noise_type="X_ERR
     circuit.append("TICK")
     circuit.append(noise_type, noisy_qubits, error_rate)
     circuit.append("TICK")
-    # print("Noise channel applied.")
 
-# def channel_erasure_errors(circuit, error_rate, noisy_qubits=list(range(16))):
-#     # Noise channel: Adding X errors with probability 0 (for testing, can be adjusted)
-#     circuit.append("TICK")
-#     # TODO how?
-#     # Reference for erasure errors in Stim: https://quantumcomputing.stackexchange.com/questions/26582/how-do-i-perform-an-erasure-error-in-stim/33887#33887
-#     circuit.append("DEPOLARIZE1", noisy_qubits, 0.75)  # 10% error probability for demonstration
-#     circuit.append("HERALDED_ERASE", noisy_qubits, 0.75)  # 10% error probability for demonstration
-#     circuit.append("TICK")
-#     # print("Noise channel applied.")
-
-
+@deprecated("Use error_correct_manual instead")
 def error_correction(circuit):
     # Error correction: Measuring the stabilizers again
 
