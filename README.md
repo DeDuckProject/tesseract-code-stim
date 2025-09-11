@@ -1,14 +1,81 @@
-# Tesseract Code
+# Stim implementation of the [[16,4,4]] Tesseract Code
 
 This repository contains implementations and simulations of the Tesseract quantum error correction code [[1]](#references) using Stim [[3]](#references).
 
-## Features
+## Overview
+### Motivation
+The 16-qubit tesseract subsystem color code offers a useful comprosmise between protection against errors and overhead. It encodes 4 logical qubits with a code rate of 1/4. By reducing 2 logical qubit from the original [[16,6,4]] code, this code achieves single-shot error correction, with only 2 ancilla qubits. This makes this code practical for current trapped-ion platforms. Recent experiments on Quantinuum hardware[[1]](#references) demonstrated preparing high-fidelity encoded graph states of up to 12 logical qubits, as well as protecting encoded states through 5 rounds of error correction. This repository reproduces these results in simulation, providing modular Stim circuits, noise modelling, and verification tests to support further research on low-overhead fault tolerance.
+
+### Project status ‼️
+This codebase is an active work-in-progress.  
+• All building blocks (encoding, noise, measurement, decoder) are implemented.  
+• The end-to-end error-correction success rate is **not yet at the target level**.
+Community testing, bug-fixes, and feature PRs are highly appreciated!
+
+### Features
 
 - Circuit implementation of the [[16,4,4]] Tesseract subsystem color code [[2]](#references) in Stim, including encoding, error correction rounds and final measurements.
 - Simulation of an error correction experiment with configurable noise setting, rounds, shot and more.
 - Plotting: sweeping of different parameters and obtaining acceptance rate and logical success rate.
 
-## Installation
+### Implementation details
+
+In order to mimic the original paper's error correction, the different parts of the experiment are implemented in the gate level, and not using Stim's `MPP` stabilizer measurements, or detectors, for example. The experiment implemented here is an error correction experiment based on Microsoft's paper[[1]](#references), and goes as follows:
+
+1. **Encoding** - The initial state is encoded using the circuits in Fig. 9a or 9b. This part is noiseless for simplicity.
+2. **Channel Noise** - Optional noise is applied on all qubits.
+3. **Error correction rounds** - Each round is composed of measureing rows/columns and X/Z stabilizers. Measurements results are saved.
+4. **Logical measurements** - Qubits are measured by breaking apart the code into two smaller codes. Each code is the [[8,3,2]] color code [[4]](#references). See [measure_logical_operators_tesseract](tesseract_sim/error_correction/measurement_rounds.py) and [verify_final_state](tesseract_sim/error_correction/decoder_manual.py) for more details.
+5. **Post processing** - Each shot is accepted or not (based on the error correction rounds); For accepted rounds, the qubits are corrected based on Pauli frame (if enabled in simulation). Next, logical qubits are measured and validated to determine the logical error rate.
+
+### Code
+#### Structure
+
+```
+tesseract-code-stim/
+├── tesseract_sim/           # Main simulation package
+│   ├── common/              # Shared utilities and base components
+│   │   ├── circuit_base.py  # Basic circuit operations and initialization
+│   │   └── code_commons.py  # Tesseract code definitions (stabilizers, operators)
+│   ├── encoding/            # State encoding implementations
+│   │   ├── encoding_manual_9a.py  # |++0000⟩ encoding (Fig 9a)
+│   │   └── encoding_manual_9b.py  # |+0+0+0⟩ encoding (Fig 9b)
+│   ├── error_correction/    # Error correction and measurement
+│   │   ├── correction_rules.py     # Correction logic for different error types
+│   │   ├── decoder_manual.py       # Manual decoder implementation
+│   │   └── measurement_rounds.py   # Stabilizer measurements and rounds
+│   ├── noise/               # Noise modeling and injection
+│   │   ├── noise_cfg.py     # Noise configuration dataclass
+│   │   └── noise_utils.py   # Noise injection utilities
+│   ├── plotting/            # Visualization and analysis
+│   │   └── plot_acceptance_rates.py  # Generate acceptance/success rate plots
+│   └── run.py               # Main simulation entry point
+├── notebooks/               # Jupyter notebooks for experiments
+│   ├── encoding_circuits_visualization.ipynb    # Circuit visualization
+│   ├── entire_experiment_circuit.ipynb          # Complete experiment demo
+│   └── tesseract_stim_simulation_real_decoder.ipynb  # Full simulation
+├── tests/                   # Test suite
+│   ├── encoding/            # Encoding tests
+│   ├── noise/               # Noise injection tests
+│   └── test_*.py            # Various experiment and functionality tests
+├── plots/                   # Generated plot outputs
+├── requirements.txt         # Python dependencies
+└── setup.py                 # Package configuration
+```
+
+#### Key Components
+
+- **`tesseract_sim/run.py`**: Main entry point for running simulations with configurable noise parameters
+- **`tesseract_sim/encoding/`**: Two encoding modes based on paper figures 9a and 9b
+- **`tesseract_sim/error_correction/`**: Manual decoder with correction rules and measurement rounds
+- **`tesseract_sim/noise/`**: Configurable noise injection for encoding and error correction phases
+- **`tesseract_sim/plotting/`**: Analysis and visualization tools for acceptance rates and logical success rates
+- **`notebooks/`**: Interactive Jupyter notebooks for experiments and visualization
+- **`tests/`**: Comprehensive test suite covering all major functionality
+
+## Quick Start
+
+### Installation
 
 ```bash
 # Clone the repository
@@ -22,12 +89,6 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 ```
-
-## Structure
-
-TODO - fill in.
-
-## Usage
 
 The main workflow is through Jupyter notebooks. After installation:
 
@@ -114,6 +175,8 @@ The script generates two types of plots:
 [2] "\([[16,6,4]]\) Tesseract color code", The Error Correction Zoo (V. V. Albert & P. Faist, eds.), 2024. https://errorcorrectionzoo.org/c/stab_16_6_4
 
 [3] C. Gidney, "Stim: a fast stabilizer circuit simulator", Quantum 5, 497 (2021). https://doi.org/10.22331/q-2021-07-06-497
+
+[4] E. Campbell, "The smallest interesting colour code", (2016). https://earltcampbell.com/2016/09/26/the-smallest-interesting-colour-code/
 
 ## License
 
