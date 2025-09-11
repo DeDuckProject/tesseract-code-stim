@@ -12,6 +12,9 @@ This codebase is an active work-in-progress.
 • The end-to-end error-correction success rate is **not yet at the target level**.
 Community testing, bug-fixes, and feature PRs are highly appreciated!
 
+**Disclaimer:** This repository is an independent, community-driven implementation.  
+It is **not** affiliated with Microsoft, Quantinuum, nor the authors of the original tesseract-code paper.
+
 ### Features
 
 - Circuit implementation of the [[16,4,4]] Tesseract subsystem color code [[2]](#references) in Stim, including encoding, error correction rounds and final measurements.
