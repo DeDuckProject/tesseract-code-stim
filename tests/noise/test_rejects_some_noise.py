@@ -1,5 +1,5 @@
 from tesseract_sim import run_simulation_ec_experiment
-from tesseract_sim.noise_cfg import NoiseCfg
+from tesseract_sim.noise.noise_cfg import NoiseCfg
 
 def test_rejects_some_noise():
     """

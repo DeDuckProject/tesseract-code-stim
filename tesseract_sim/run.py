@@ -1,12 +1,12 @@
 import argparse
 
-from tesseract_sim.encoding_manual_9b import encode_manual_fig9b
-from .circuit_base import init_circuit, channel
-from .encoding_manual_9a import encode_manual_fig9a
+from tesseract_sim.encoding.encoding_manual_9b import encode_manual_fig9b
+from tesseract_sim.common.circuit_base import init_circuit, channel
+from tesseract_sim.encoding.encoding_manual_9a import encode_manual_fig9a
 from typing import Literal
-from .measurement_rounds import error_correct_manual, measure_logical_operators_tesseract
-from .decoder_manual import run_manual_error_correction
-from .noise_cfg import NoiseCfg, NO_NOISE
+from tesseract_sim.error_correction.measurement_rounds import error_correct_manual, measure_logical_operators_tesseract
+from tesseract_sim.error_correction.decoder_manual import run_manual_error_correction
+from tesseract_sim.noise.noise_cfg import NoiseCfg, NO_NOISE
 
 
 def build_circuit_ec_experiment(rounds: int, cfg: NoiseCfg = NO_NOISE, encoding_mode: Literal['9a', '9b'] = '9b'):
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     parser.add_argument("--channel-noise-type", type=str, default="DEPOLARIZE1", help="Channel noise type (e.g., DEPOLARIZE1, X_ERROR, Z_ERROR).")
     parser.add_argument("--experiment", type=int, choices=[1], default=1, help="Which experiment to run (only 1 available)")
     parser.add_argument("--no-apply-pauli-frame", action="store_false", dest="apply_pauli_frame", help="Disable Pauli frame corrections during logical verification")
-    parser.add_argument("--encoding-mode", type=str, choices=['9a', '9b'], default='9b', help="Encoding mode")
+    parser.add_argument("--encoding-mode", type=str, choices=['9a', '9b'], default='9b', help="Encoding mode, based on Fig 9a or 9b in the paper")
     
     args = parser.parse_args()
 

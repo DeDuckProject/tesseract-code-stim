@@ -1,5 +1,5 @@
-from .noise_utils import append_1q, append_2q
-from .noise_cfg import NoiseCfg, NO_NOISE
+from tesseract_sim.noise.noise_utils import append_1q, append_2q
+from tesseract_sim.noise.noise_cfg import NoiseCfg, NO_NOISE
 
 
 # This file contains the functions for encoding the state |++0000> as described in Fig. 9a of that paper

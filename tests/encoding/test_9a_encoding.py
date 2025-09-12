@@ -1,8 +1,6 @@
-import stim
-import numpy as np
 from tesseract_sim.run import build_circuit_ec_experiment
-from tesseract_sim.decoder_manual import run_manual_error_correction
-from tesseract_sim.noise_cfg import NO_NOISE
+from tesseract_sim.error_correction.decoder_manual import run_manual_error_correction
+from tesseract_sim.noise.noise_cfg import NO_NOISE
 
 def test_9a_encoding_no_noise_perfect_state():
     """Test that 9a encoding (|++0000>) with only Z checks gives perfect results with no noise."""

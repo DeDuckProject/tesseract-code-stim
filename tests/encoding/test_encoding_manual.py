@@ -1,7 +1,7 @@
 import stim
-from tesseract_sim.encoding_manual_9a import encode_manual_fig9a
-from tesseract_sim.commons import measurement_operators_rows, measurement_operators_columns
-from tesseract_sim.measurement_rounds import measure_x_z_stabilizer
+from tesseract_sim.encoding.encoding_manual_9a import encode_manual_fig9a
+from tesseract_sim.common.code_commons import measurement_operators_rows, measurement_operators_columns
+from tesseract_sim.error_correction.measurement_rounds import measure_x_z_stabilizer
 import pytest
 
 # This tests is not working currently. we are going to try and implement the |+0+0+0> encoder from fig 9b anyway.
@@ -40,7 +40,7 @@ def test_encoded_state_is_stabilizer_eigenstate_9a():
 def test_encode_manual_fig9b():
     """Test that encode_manual_fig9b correctly encodes the |+0+0+0> state in both blocks."""
     import stim
-    from tesseract_sim.encoding_manual_9b import encode_manual_fig9b
+    from tesseract_sim.encoding.encoding_manual_9b import encode_manual_fig9b
     
     # Create circuit
     circuit = stim.Circuit()
