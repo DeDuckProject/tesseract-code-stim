@@ -6,7 +6,9 @@ This repository contains implementations and simulations of the Tesseract quantu
 ### Motivation
 The 16-qubit tesseract subsystem color code offers a useful comprosmise between protection against errors and overhead. It encodes 4 logical qubits with a code rate of 1/4. By reducing 2 logical qubit from the original [[16,6,4]] code, this code achieves single-shot error correction, with only 2 ancilla qubits. This makes this code practical for current trapped-ion platforms. Recent experiments on Quantinuum hardware[[1]](#references) demonstrated preparing high-fidelity encoded graph states of up to 12 logical qubits, as well as protecting encoded states through 5 rounds of error correction. This repository reproduces these results in simulation, providing modular Stim circuits, noise modelling, and verification tests to support further research on low-overhead fault tolerance.
 
-### Project status ‼️
+![Figure 1: Tesseract code structure (from [1])](docs/images/fig1_tesseract_code.png)
+
+### Project status
 This codebase is an active work-in-progress.  
 • All building blocks (encoding, noise, measurement, decoder) are implemented.  
 • The end-to-end error-correction success rate is **not yet at the target level**.
@@ -23,7 +25,12 @@ It is **not** affiliated with Microsoft, Quantinuum, nor the authors of the orig
 
 ### Implementation details
 
-In order to mimic the original paper's error correction, the different parts of the experiment are implemented in the gate level, and not using Stim's `MPP` stabilizer measurements, or detectors, for example. The experiment implemented here is an error correction experiment based on Microsoft's paper[[1]](#references), and goes as follows:
+In order to mimic the original paper's error correction, the different parts of the experiment are implemented in the gate level, and not using Stim's `MPP` stabilizer measurements, or detectors, for example.
+The experiment implemented here is an error correction experiment based on Microsoft's paper[[1]](#references), and resembles the experimental setup shown in Figure 8 below.
+
+![Figure 8: Error correction experiment (from [1])](docs/images/fig8_error_correction_experiment.png)
+
+The experiment goes as follows:
 
 1. **Encoding** - The initial state is encoded using the circuits in Fig. 9a or 9b. This part is noiseless for simplicity.
 2. **Channel Noise** - Optional noise is applied on all qubits.
@@ -170,6 +177,10 @@ The `plotting/plot_acceptance_rates.py` script generates acceptance and logical 
 The script generates two types of plots:
 - **Acceptance Rate Plots**: Show how well the error correction accepts states across different noise levels and rounds
 - **Logical Success Rate Plots**: Show the conditional probability of logical success given acceptance
+
+**Example Results:**
+
+![Acceptance Rates vs Error Correction Noise](plots/acceptance_rates_ec_noise_ec_experiment.png)
 
 ## References
 
