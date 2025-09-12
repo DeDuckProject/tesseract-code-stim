@@ -8,3 +8,11 @@
 /original_paper/arXiv-2409.04628v2/tesseract.log
 /.idea/
 /venv/
+
+# Python build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
