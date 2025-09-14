@@ -123,6 +123,17 @@ def plot_ec_experiment(
         out_path=os.path.join(out_dir, f'logical_rates_{"channel" if sweep_channel_noise else "ec"}_noise_ec_experiment.png')
     )
 
+def str_to_bool(v):
+    """Convert string to boolean for argparse."""
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
 def main():
     parser = argparse.ArgumentParser(description="Generate acceptance rate plots for tesseract experiments")
     parser.add_argument('--experiments', type=int, nargs='+', choices=[2], default=[2],
@@ -131,7 +142,7 @@ def main():
                       help='Number of shots per data point')
     parser.add_argument('--out-dir', type=str, default='../plots',
                       help='Output directory for plots')
-    parser.add_argument('--apply_pauli_frame', type=bool, default=False, help='Perform final correction - apply the measured Pauli frame. The error correction rounds and measurements (besides the actual correction at the end) happen regardless, based on the number of rounds.')
+    parser.add_argument('--apply_pauli_frame', type=str_to_bool, default=False, help='Perform final correction - apply the measured Pauli frame. The error correction rounds and measurements (besides the actual correction at the end) happen regardless, based on the number of rounds.')
     parser.add_argument('--encoding-mode', type=str, choices=['9a', '9b'], default='9a', help='Encoding mode')
     parser.add_argument('--sweep-channel-noise', action='store_true', help='Sweep channel noise instead of EC noise. Channel noise acts once after encoding and before the error correction rounds.')
     args = parser.parse_args()
