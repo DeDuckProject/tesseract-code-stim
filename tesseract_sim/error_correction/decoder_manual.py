@@ -164,6 +164,7 @@ def run_manual_error_correction(circuit, shots, rounds, apply_pauli_frame = True
     # Calculate parameters based on encoding mode
     only_z_checks = (encoding_mode == '9a')
     measurement_offset = 0 if encoding_mode == '9a' else 2
+    max_checks = 2 if only_z_checks else 4
     
     sampler = circuit.compile_sampler()
     shot_data_all = sampler.sample(shots=shots)
@@ -184,7 +185,6 @@ def run_manual_error_correction(circuit, shots, rounds, apply_pauli_frame = True
             total_successful_checks += successful_checks
             
             # Count shots where all parity checks pass
-            max_checks = 2 if only_z_checks else 4
             if successful_checks == max_checks:
                 logical_shots_passed += 1
             
