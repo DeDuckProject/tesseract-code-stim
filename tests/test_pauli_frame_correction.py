@@ -32,7 +32,7 @@ def test_single_pauli_error_correction(qubit_index, pauli_gate):
     circuit.append(pauli_gate, [qubit_index])
     
     # Run simulation with 9a encoding mode (appropriate for |++0000>)
-    ec_accept, logical_pass, logical_fail = run_manual_error_correction(
+    ec_accept, logical_pass, average_percentage = run_manual_error_correction(
         circuit, shots=100, rounds=1, encoding_mode='9a'
     )
     
@@ -48,10 +48,10 @@ def test_single_pauli_error_correction(qubit_index, pauli_gate):
         f"got {logical_pass}/100 passed"
     )
     
-    # No logical failures should occur
-    assert logical_fail == 0, (
-        f"Expected no logical failures for {pauli_gate} error on qubit {qubit_index}, "
-        f"got {logical_fail}/100 failed"
+    # Average percentage should be 100% for perfect correction
+    assert average_percentage == 1.0, (
+        f"Expected 100% average success rate for {pauli_gate} error on qubit {qubit_index}, "
+        f"got {average_percentage:.2%}"
     )
 
 
@@ -61,13 +61,13 @@ def test_no_noise_perfect_state():
     circuit = build_circuit_ec_experiment(rounds=1, cfg=NO_NOISE, encoding_mode='9a')
     
     # Run simulation with 9a encoding mode (appropriate for |++0000>)
-    ec_accept, logical_pass, logical_fail = run_manual_error_correction(circuit, shots=100, rounds=1, encoding_mode='9a')
+    ec_accept, logical_pass, average_percentage = run_manual_error_correction(circuit, shots=100, rounds=1, encoding_mode='9a')
     
     # All shots should be accepted
     assert ec_accept == 100, f"Expected all shots accepted, got {ec_accept}"
     # All shots should pass logical check
     assert logical_pass == 100, f"Expected all shots to pass logical check, got {logical_pass}"
-    assert logical_fail == 0, f"Expected no logical failures, got {logical_fail}"
+    assert average_percentage == 1.0, f"Expected 100% average success rate, got {average_percentage:.2%}"
 
 
 # Legacy individual tests for backward compatibility and specific debugging
@@ -80,13 +80,13 @@ def test_single_x_error_correction():
     circuit.append("X", [8])
     
     # Run simulation with 9a encoding mode (appropriate for |++0000>)
-    ec_accept, logical_pass, logical_fail = run_manual_error_correction(circuit, shots=100, rounds=1, encoding_mode='9a')
+    ec_accept, logical_pass, average_percentage = run_manual_error_correction(circuit, shots=100, rounds=1, encoding_mode='9a')
     
     # All shots should be accepted since we only have a correctable error
     assert ec_accept == 100, f"Expected all shots accepted, got {ec_accept}"
     # All shots should pass logical check after Pauli frame correction
     assert logical_pass == 100, f"Expected all shots to pass logical check, got {logical_pass}"
-    assert logical_fail == 0, f"Expected no logical failures, got {logical_fail}"
+    assert average_percentage == 1.0, f"Expected 100% average success rate, got {average_percentage:.2%}"
 
 
 def test_single_z_error_correction():
@@ -98,10 +98,10 @@ def test_single_z_error_correction():
     circuit.append("Z", [0])
     
     # Run simulation with 9a encoding mode (appropriate for |++0000>)
-    ec_accept, logical_pass, logical_fail = run_manual_error_correction(circuit, shots=100, rounds=1, encoding_mode='9a')
+    ec_accept, logical_pass, average_percentage = run_manual_error_correction(circuit, shots=100, rounds=1, encoding_mode='9a')
     
     # All shots should be accepted since we only have a correctable error
     assert ec_accept == 100, f"Expected all shots accepted, got {ec_accept}"
     # All shots should pass logical check after Pauli frame correction
     assert logical_pass == 100, f"Expected all shots to pass logical check, got {logical_pass}"
-    assert logical_fail == 0, f"Expected no logical failures, got {logical_fail}" 
+    assert average_percentage == 1.0, f"Expected 100% average success rate, got {average_percentage:.2%}" 

@@ -147,7 +147,6 @@ def verify_final_state(shot_tail, frameX=None, frameZ=None, apply_pauli_frame = 
 def run_manual_error_correction(circuit, shots, rounds, apply_pauli_frame = True, encoding_mode ='9b'):
     """
     Runs the full manual error correction simulation with final logical state verification.
-    Returns counts of shots that pass error correction and total successful parity checks.
     
     Args:
         circuit: The quantum circuit to simulate
@@ -155,6 +154,12 @@ def run_manual_error_correction(circuit, shots, rounds, apply_pauli_frame = True
         rounds: Number of error correction rounds
         apply_pauli_frame: Whether to apply Pauli frame corrections
         encoding_mode: '9a' or '9b' - determines measurement offset and which parity checks to perform
+    
+    Returns:
+        tuple: (ec_accept, logical_shots_passed, average_percentage)
+            - ec_accept: number of successful experiments (i.e all rounds of ec "accept")
+            - logical_shots_passed: number of experiments when the final logical qubits measured had all qubits in the ideal state
+            - average_percentage: average percentage of qubits measured correctly across all shots
     """
     # Calculate parameters based on encoding mode
     only_z_checks = (encoding_mode == '9a')
@@ -166,6 +171,7 @@ def run_manual_error_correction(circuit, shots, rounds, apply_pauli_frame = True
     ec_accept = 0
     logical_shots_passed = 0
     total_successful_checks = 0
+    fractional_logical_passed = 0.0
 
     for shot_data in shot_data_all:
         # Process error correction rounds with appropriate measurement offset
@@ -181,16 +187,18 @@ def run_manual_error_correction(circuit, shots, rounds, apply_pauli_frame = True
             max_checks = 2 if only_z_checks else 4
             if successful_checks == max_checks:
                 logical_shots_passed += 1
+            
+            # Add fractional contribution for average percentage calculation
+            fractional_logical_passed += successful_checks / max_checks
 
-    # Calculate normalized logical success rate (total successful checks / total possible checks)
-    max_checks = 2 if only_z_checks else 4
-    normalized_logical_rate = total_successful_checks / (shots * max_checks) if shots > 0 else 0
+    # Calculate average percentage of qubits measured correctly
+    average_percentage = fractional_logical_passed / shots if shots > 0 else 0.0
 
     print(f"Correcting by Pauli frame → {apply_pauli_frame}")
     print(f"After EC rounds → {ec_accept}/{shots} accepted")
     checks_desc = "Z3,Z5" if only_z_checks else "X4,X6,Z3,Z5"
     print(f"Total successful parity checks ({checks_desc}) → {total_successful_checks}/{shots * max_checks}")
-    print(f"Normalized logical success rate → {normalized_logical_rate:.2%}")
+    print(f"Average percentage of checks passed → {average_percentage:.2%}")
     print(f"Logical shots passed (all checks) → {logical_shots_passed}/{shots}")
 
-    return ec_accept, logical_shots_passed, shots - logical_shots_passed 
+    return ec_accept, logical_shots_passed, average_percentage 

@@ -15,9 +15,9 @@ def test_ec_experiment_noise_rejects_some():
         ec_rate_2q=0.02   # 2% error rate on 2-qubit gates
     )
     
-    ec_accept, logical_pass, logical_fail = run_simulation_ec_experiment(rounds=rounds, shots=shots, cfg=cfg, encoding_mode='9a')
+    ec_accept, logical_pass, average_percentage = run_simulation_ec_experiment(rounds=rounds, shots=shots, cfg=cfg, encoding_mode='9a')
     
     # With noise, we expect some shots to fail, but not all
     assert 0 < logical_pass < shots, "Some shots should pass with noise, but not all"
-    assert logical_fail > 0, "Some shots should fail logical verification with noise"
+    assert average_percentage < 1.0, "Average percentage should be less than 100% with noise"
     assert ec_accept > logical_pass, "Some shots that pass EC should fail logical verification" 
