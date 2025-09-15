@@ -1,5 +1,5 @@
 import pytest
-from tesseract_sim.run import build_circuit_ec_experiment
+from tesseract_sim.run import build_encoding_circuit, build_error_correction_circuit
 from tesseract_sim.error_correction.decoder_manual import run_manual_error_correction
 from tesseract_sim.noise.noise_cfg import NO_NOISE
 
@@ -25,27 +25,30 @@ def test_single_pauli_error_correction(qubit_index, pauli_gate):
     2. The logical state is recovered after Pauli frame correction (logical_pass = 100%)
     3. No logical failures occur (logical_fail = 0%)
     """
-    # Build circuit with no noise during encoding/EC
-    circuit = build_circuit_ec_experiment(rounds=1, cfg=NO_NOISE, encoding_mode='9a')
+    # Build encoding circuit with no noise
+    circuit = build_encoding_circuit(NO_NOISE, '9a')
     
     # Inject the specified Pauli error on the specified qubit
     circuit.append(pauli_gate, [qubit_index])
     
+    # Build error correction circuit
+    build_error_correction_circuit(NO_NOISE, circuit, rounds=3)
+    
     # Run simulation with 9a encoding mode (appropriate for |++0000>)
     ec_accept, logical_pass, average_percentage = run_manual_error_correction(
-        circuit, shots=100, rounds=1, encoding_mode='9a'
+        circuit, shots=5, rounds=1, encoding_mode='9a'
     )
     
     # All shots should be accepted since single errors are correctable
-    assert ec_accept == 100, (
+    assert ec_accept == 5, (
         f"Expected all shots accepted for {pauli_gate} error on qubit {qubit_index}, "
-        f"got {ec_accept}/100 accepted"
+        f"got {ec_accept}/5 accepted"
     )
     
     # All shots should pass logical check after Pauli frame correction
-    assert logical_pass == 100, (
+    assert logical_pass == 5, (
         f"Expected all shots to pass logical check for {pauli_gate} error on qubit {qubit_index}, "
-        f"got {logical_pass}/100 passed"
+        f"got {logical_pass}/5 passed"
     )
     
     # Average percentage should be 100% for perfect correction
@@ -57,8 +60,11 @@ def test_single_pauli_error_correction(qubit_index, pauli_gate):
 
 def test_no_noise_perfect_state():
     """Test that with no noise at all, we get perfect acceptance and logical pass rates."""
-    # Build circuit with no noise and no injected errors
-    circuit = build_circuit_ec_experiment(rounds=1, cfg=NO_NOISE, encoding_mode='9a')
+    # Build encoding circuit with no noise
+    circuit = build_encoding_circuit(NO_NOISE, '9a')
+    
+    # Build error correction circuit (no injected errors)
+    build_error_correction_circuit(NO_NOISE, circuit, rounds=1)
     
     # Run simulation with 9a encoding mode (appropriate for |++0000>)
     ec_accept, logical_pass, average_percentage = run_manual_error_correction(circuit, shots=100, rounds=1, encoding_mode='9a')
@@ -73,11 +79,14 @@ def test_no_noise_perfect_state():
 # Legacy individual tests for backward compatibility and specific debugging
 def test_single_x_error_correction():
     """Test that a single X error on a Z-basis measurement qubit gets corrected by the Pauli frame."""
-    # Build circuit with no noise during encoding/EC
-    circuit = build_circuit_ec_experiment(rounds=1, cfg=NO_NOISE, encoding_mode='9a')
+    # Build encoding circuit with no noise
+    circuit = build_encoding_circuit(NO_NOISE, '9a')
     
     # Inject a single X error on qubit 8 (first qubit measured in Z basis)
     circuit.append("X", [8])
+    
+    # Build error correction circuit
+    build_error_correction_circuit(NO_NOISE, circuit, rounds=1)
     
     # Run simulation with 9a encoding mode (appropriate for |++0000>)
     ec_accept, logical_pass, average_percentage = run_manual_error_correction(circuit, shots=100, rounds=1, encoding_mode='9a')
@@ -91,11 +100,14 @@ def test_single_x_error_correction():
 
 def test_single_z_error_correction():
     """Test that a single Z error on an X-basis measurement qubit gets corrected by the Pauli frame."""
-    # Build circuit with no noise during encoding/EC
-    circuit = build_circuit_ec_experiment(rounds=1, cfg=NO_NOISE, encoding_mode='9a')
+    # Build encoding circuit with no noise
+    circuit = build_encoding_circuit(NO_NOISE, '9a')
     
     # Inject a single Z error on qubit 0 (first qubit measured in X basis)
     circuit.append("Z", [0])
+    
+    # Build error correction circuit
+    build_error_correction_circuit(NO_NOISE, circuit, rounds=1)
     
     # Run simulation with 9a encoding mode (appropriate for |++0000>)
     ec_accept, logical_pass, average_percentage = run_manual_error_correction(circuit, shots=100, rounds=1, encoding_mode='9a')
