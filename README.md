@@ -174,6 +174,11 @@ The `plotting/plot_acceptance_rates.py` script generates acceptance and logical 
     python tesseract_sim/plotting/plot_acceptance_rates.py --apply_pauli_frame true --encoding-mode 9a --out-dir ./custom_plots
     ```
 
+*   **Customize rounds and noise levels:**
+    ```bash
+    python tesseract_sim/plotting/plot_acceptance_rates.py --rounds 1 5 10 20 --noise-levels 0.01 0.05 0.1 --shots 1000
+    ```
+
 The script generates two types of plots:
 - **Acceptance Rate Plots**: Show how well the error correction accepts states across different noise levels and rounds
 - **Logical Success Rate Plots**: Show the conditional probability of logical success given acceptance

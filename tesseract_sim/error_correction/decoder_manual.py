@@ -204,13 +204,16 @@ def run_manual_error_correction(circuit, shots, rounds, apply_pauli_frame = True
             fractional_logical_passed += successful_checks / max_checks
 
     # Calculate average percentage of qubits measured correctly
-    average_percentage = fractional_logical_passed / ec_accept if ec_accept > 0 else 0.0
+    average_percentage = fractional_logical_passed / ec_accept if ec_accept > 0 else None
 
     print(f"Correcting by Pauli frame → {apply_pauli_frame}")
     print(f"After EC rounds → {ec_accept}/{shots} accepted")
     checks_desc = "Z3,Z5" if only_z_checks else "X4,X6,Z3,Z5"
     print(f"Total successful parity checks ({checks_desc}) → {total_successful_checks}/{shots * max_checks}")
-    print(f"Average percentage of checks passed → {average_percentage:.2%}")
+    if average_percentage is not None:
+        print(f"Average percentage of checks passed → {average_percentage:.2%}")
+    else:
+        print(f"Average percentage of checks passed → N/A (no accepted shots)")
     print(f"Logical shots passed (all checks) → {logical_shots_passed}/{shots}")
 
     return ec_accept, logical_shots_passed, average_percentage 

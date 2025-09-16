@@ -83,7 +83,9 @@ def plot_curve(
     data: Dict[float, List[float]],
     title: str,
     ylabel: str,
-    out_path: str
+    out_path: str,
+    xlim: Tuple[float, float] = None,
+    ylim: Tuple[float, float] = None
 ) -> None:
     """Plots and saves a single curve from sweep data."""
     plt.figure(figsize=(12, 8))
@@ -96,6 +98,12 @@ def plot_curve(
     plt.title(title)
     plt.grid(True)
     plt.legend()
+    
+    # Set axis limits if provided
+    if xlim is not None:
+        plt.xlim(xlim)
+    if ylim is not None:
+        plt.ylim(ylim)
     
     plt.savefig(out_path)
     print(f"Plot saved to {out_path}")
@@ -188,12 +196,18 @@ def plot_ec_experiment(
         for noise, tuples in raw_results.items()
     }
 
+    # Set fixed axis ranges
+    max_rounds = max(rounds)
+    x_range = (0, max_rounds)
+    
     noise_type = "Channel" if sweep_channel_noise else "EC"
     plot_curve(
         rounds, ec_data,
         title=f"{noise_type} Acceptance vs Rounds (EC Experiment)",
         ylabel="EC Acceptance Rate",
-        out_path=os.path.join(out_dir, 'acceptance_rates_ec_experiment.png')
+        out_path=os.path.join(out_dir, 'acceptance_rates_ec_experiment.png'),
+        xlim=x_range,
+        ylim=(0, 1)
     )
 
     # Derive logical check rate from same raw results - normalized by acceptance
@@ -203,7 +217,9 @@ def plot_ec_experiment(
         rounds, logical_data,
         title=f"Logical Check Success vs Rounds (EC Experiment) - {noise_type} Noise",
         ylabel="Logical Success Rate | Accepted",
-        out_path=os.path.join(out_dir, 'logical_rates_ec_experiment.png')
+        out_path=os.path.join(out_dir, 'logical_rates_ec_experiment.png'),
+        xlim=x_range,
+        ylim=(0, 1)
     )
 
     # Derive average fidelity from same raw results
@@ -213,7 +229,9 @@ def plot_ec_experiment(
         rounds, fidelity_data,
         title=f"Average Fidelity vs Rounds (EC Experiment) - {noise_type} Noise",
         ylabel="Average Fidelity",
-        out_path=os.path.join(out_dir, 'fidelity_rates_ec_experiment.png')
+        out_path=os.path.join(out_dir, 'fidelity_rates_ec_experiment.png'),
+        xlim=x_range,
+        ylim=(0.45, 1)
     )
     
     # Calculate total runtime and update metadata
@@ -242,21 +260,29 @@ def str_to_bool(v):
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
 def main():
+    # Define defaults
+    default_rounds = list(range(1, 11)) + [15, 20]
+    default_noise_levels = list(np.linspace(0.0000, 0.01, 10))
+    
     parser = argparse.ArgumentParser(description="Generate acceptance rate plots for tesseract experiments")
     parser.add_argument('--experiments', type=int, nargs='+', choices=[2], default=[2],
                       help='Which experiments to plot (currently only 2 is supported)')
     parser.add_argument('--shots', type=int, default=10000,
                       help='Number of shots per data point')
-    parser.add_argument('--out-dir', type=str, default='../plots',
+    parser.add_argument('--out-dir', type=str, default='./plots',
                       help='Base output directory for plots (timestamped subdirectory will be created)')
     parser.add_argument('--apply_pauli_frame', type=str_to_bool, default=False, help='Perform final correction - apply the measured Pauli frame. The error correction rounds and measurements (besides the actual correction at the end) happen regardless, based on the number of rounds.')
     parser.add_argument('--encoding-mode', type=str, choices=['9a', '9b'], default='9a', help='Encoding mode')
     parser.add_argument('--sweep-channel-noise', action='store_true', help='Sweep channel noise instead of EC noise. Channel noise acts once after encoding and before the error correction rounds.')
+    parser.add_argument('--rounds', type=int, nargs='+', default=default_rounds,
+                      help=f'List of EC rounds to sweep (e.g. 1 10 20 30). Default: {default_rounds}')
+    parser.add_argument('--noise-levels', type=float, nargs='+', default=default_noise_levels,
+                      help=f'List of noise rates to sweep (e.g. 0.05 0.1 0.2). Default: 10 points from 0.0 to 0.01')
     args = parser.parse_args()
 
-    # Combine detailed lower rounds with higher rounds
-    rounds = list(range(1, 11)) + [15, 20]
-    noise_levels = np.linspace(0.0000, 0.01, 10)  # 30 points between 0 and 1%
+    # Use configurable values
+    rounds = args.rounds
+    noise_levels = args.noise_levels
     
     os.makedirs(args.out_dir, exist_ok=True)
 
