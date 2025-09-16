@@ -1,0 +1,37 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "Stim Implementation of the [[16,4,4]] Tesseract Code"
+abstract: "A complete Stim-based simulation of the Tesseract quantum error correction code with gate-level encoding, error correction rounds, and manual decoding."
+authors:
+  - family-names: "Yakar"
+    given-names: "Iftach"
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+repository-code: "https://github.com/DeDuckProject/tesseract-code-stim"
+url: "https://github.com/DeDuckProject/tesseract-code-stim"
+license: MIT
+date-released: 2024-09-16
+version: "0.1.0"
+keywords:
+  - "quantum error correction"
+  - "tesseract code"
+  - "stim"
+  - "quantum computing"
+  - "fault tolerance"
+references:
+  - type: article
+    title: "Demonstration of quantum computation and error correction with a tesseract code"
+    authors:
+      - family-names: "Reichardt"
+        given-names: "Ben W."
+    year: 2024
+    url: "https://arxiv.org/abs/2409.04628"
+    notes: "arXiv:2409.04628"
+  - type: software
+    title: "Stim: a fast stabilizer circuit simulator"
+    authors:
+      - family-names: "Gidney"
+        given-names: "Craig"
+    year: 2021
+    url: "https://github.com/quantumlib/Stim"
+    doi: "10.22331/q-2021-07-06-497"
