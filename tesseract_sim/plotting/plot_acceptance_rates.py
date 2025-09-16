@@ -45,6 +45,37 @@ def sweep_results(
 
     return results
 
+def compute_logical_success_rate(raw_results: Dict[float, List[Tuple[int, int, float]]]) -> Dict[float, List[float]]:
+    """Extract logical success rates from raw results. Logical success == all qubits are measured with the correct results.
+    
+    Args:
+        raw_results: Dict mapping noise levels to lists of (accepted, logical_pass, avg_fidelity) tuples
+        
+    Returns:
+        Dict mapping noise levels to lists of logical success rates (logical_pass/accepted)
+    """
+    return {
+        noise: [
+            t[1]/t[0] if t[0] > 0 else 0.0  # logical_pass/accepted (conditional probability)
+            for t in tuples
+        ]
+        for noise, tuples in raw_results.items()
+    }
+
+def compute_average_fidelity(raw_results: Dict[float, List[Tuple[int, int, float]]]) -> Dict[float, List[float]]:
+    """Extract average fidelity values from raw results.
+    
+    Args:
+        raw_results: Dict mapping noise levels to lists of (accepted, logical_pass, avg_fidelity) tuples
+        
+    Returns:
+        Dict mapping noise levels to lists of average fidelity values
+    """
+    return {
+        noise: [t[2] for t in tuples]  # avg_fidelity
+        for noise, tuples in raw_results.items()
+    }
+
 def plot_curve(
     rounds: List[int],
     data: Dict[float, List[float]],
@@ -108,19 +139,23 @@ def plot_ec_experiment(
     )
 
     # Derive logical check rate from same raw results - normalized by acceptance
-    logical_data = {
-        noise: [
-            t[1]/t[0] if t[0] > 0 else 0.0  # logical_pass/accepted (conditional probability)
-            for t in tuples
-        ]
-        for noise, tuples in raw_results.items()
-    }
+    logical_data = compute_logical_success_rate(raw_results)
 
     plot_curve(
         rounds, logical_data,
         title=f"Logical Check Success vs Rounds (EC Experiment) - {noise_type} Noise",
         ylabel="Logical Success Rate | Accepted",
         out_path=os.path.join(out_dir, f'logical_rates_{"channel" if sweep_channel_noise else "ec"}_noise_ec_experiment.png')
+    )
+
+    # Derive average fidelity from same raw results
+    fidelity_data = compute_average_fidelity(raw_results)
+
+    plot_curve(
+        rounds, fidelity_data,
+        title=f"Average Fidelity vs Rounds (EC Experiment) - {noise_type} Noise",
+        ylabel="Average Fidelity",
+        out_path=os.path.join(out_dir, f'fidelity_rates_{"channel" if sweep_channel_noise else "ec"}_noise_ec_experiment.png')
     )
 
 def str_to_bool(v):
@@ -148,8 +183,8 @@ def main():
     args = parser.parse_args()
 
     # Combine detailed lower rounds with higher rounds
-    rounds = list(range(1, 11)) + [20, 30, 40, 50]
-    noise_levels = np.linspace(0.0000, 0.01, 30)  # 30 points between 0 and 1%
+    rounds = list(range(1, 11)) + [15, 20]
+    noise_levels = np.linspace(0.0000, 0.01, 10)  # 30 points between 0 and 1%
     
     os.makedirs(args.out_dir, exist_ok=True)
 
