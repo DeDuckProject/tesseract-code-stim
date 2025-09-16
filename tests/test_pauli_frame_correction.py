@@ -36,7 +36,7 @@ def test_single_pauli_error_correction(qubit_index, pauli_gate):
     
     # Run simulation with 9a encoding mode (appropriate for |++0000>)
     ec_accept, logical_pass, average_percentage = run_manual_error_correction(
-        circuit, shots=5, rounds=1, encoding_mode='9a'
+        circuit, shots=5, rounds=3, encoding_mode='9a'
     )
     
     # All shots should be accepted since single errors are correctable
