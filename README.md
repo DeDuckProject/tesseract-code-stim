@@ -1,5 +1,7 @@
 # Stim Implementation of the [[16,4,4]] Tesseract Code
 
+[![DOI](https://zenodo.org/badge/1014457478.svg)](https://doi.org/10.5281/zenodo.17137850)
+
 ## Overview
 • **What it is**: A complete Stim-based [[3]](#references) simulation of the Tesseract quantum error correction code [[1]](#references) with gate-level encoding, error correction rounds, and manual decoding.
 

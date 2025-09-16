@@ -9,9 +9,10 @@ authors:
     orcid: "https://orcid.org/0009-0003-8795-3794"
 repository-code: "https://github.com/DeDuckProject/tesseract-code-stim"
 url: "https://github.com/DeDuckProject/tesseract-code-stim"
+doi: "10.5281/zenodo.17137851"
 license: MIT
 date-released: 2024-09-16
-version: "0.1.0"
+version: "0.1.1"
 keywords:
   - "quantum error correction"
   - "tesseract code"
