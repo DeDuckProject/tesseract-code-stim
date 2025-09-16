@@ -118,7 +118,11 @@ def write_experiment_metadata(
     apply_pauli_frame: bool,
     encoding_mode: str,
     sweep_channel_noise: bool,
-    runtime_seconds: float = None
+    runtime_seconds: float = None,
+    ec_rate_1q: float = None,
+    ec_rate_2q: float = None,
+    meas_error_rate: float = 0.0,
+    channel_noise_rate: float = None
 ) -> None:
     """Write experiment metadata to a text file."""
     metadata_path = os.path.join(out_dir, "experiment_metadata.txt")
@@ -142,6 +146,20 @@ def write_experiment_metadata(
         f.write(f"Apply Pauli frame correction: {apply_pauli_frame}\n")
         f.write(f"Encoding mode: {encoding_mode}\n")
         f.write(f"Sweep channel noise: {sweep_channel_noise}\n")
+        f.write(f"Measurement error rate: {meas_error_rate}\n")
+        
+        # Report if using fixed rates vs sweep
+        use_fixed_rates = (ec_rate_1q is not None and ec_rate_2q is not None) or channel_noise_rate is not None
+        if use_fixed_rates:
+            f.write(f"Mode: Fixed noise rates\n")
+            if ec_rate_1q is not None:
+                f.write(f"EC 1Q rate (fixed): {ec_rate_1q}\n")
+            if ec_rate_2q is not None:
+                f.write(f"EC 2Q rate (fixed): {ec_rate_2q}\n")
+            if channel_noise_rate is not None:
+                f.write(f"Channel noise rate (fixed): {channel_noise_rate}\n")
+        else:
+            f.write(f"Mode: Sweeping noise rates\n")
         
         if sweep_channel_noise:
             f.write(f"Noise configuration: Sweeping channel noise only\n")
@@ -166,7 +184,11 @@ def plot_ec_experiment(
     base_out_dir: str,
     apply_pauli_frame: bool = True,
     encoding_mode: Literal['9a', '9b'] = '9b',
-    sweep_channel_noise: bool = False
+    sweep_channel_noise: bool = False,
+    ec_rate_1q: float = None,
+    ec_rate_2q: float = None,
+    meas_error_rate: float = 0.0,
+    channel_noise_rate: float = None
 ) -> None:
     """Plots both EC acceptance and logical check rates for the EC experiment."""
     start_time = time.time()
@@ -177,10 +199,52 @@ def plot_ec_experiment(
     os.makedirs(out_dir, exist_ok=True)
     
     # One sweep collecting full results
-    if sweep_channel_noise:
-        cfg_builder = lambda noise: NoiseCfg(ec_active=False, channel_noise_level=noise, channel_noise_type="DEPOLARIZE1")
+    # Determine if we're using fixed rates or sweeping
+    use_fixed_rates = (ec_rate_1q is not None and ec_rate_2q is not None) or channel_noise_rate is not None
+    
+    if use_fixed_rates:
+        # Use fixed rates - ignore noise_levels sweep
+        if sweep_channel_noise:
+            fixed_channel_rate = channel_noise_rate if channel_noise_rate is not None else 0.0
+            cfg_builder = lambda _: NoiseCfg(
+                ec_active=False, 
+                channel_noise_level=fixed_channel_rate, 
+                channel_noise_type="DEPOLARIZE1",
+                meas_active=meas_error_rate > 0,
+                meas_error_rate=meas_error_rate
+            )
+            noise_levels = [fixed_channel_rate]  # Single point for fixed rate
+        else:
+            fixed_1q = ec_rate_1q if ec_rate_1q is not None else 0.0
+            fixed_2q = ec_rate_2q if ec_rate_2q is not None else 0.0
+            cfg_builder = lambda _: NoiseCfg(
+                ec_active=True, 
+                ec_rate_1q=fixed_1q, 
+                ec_rate_2q=fixed_2q, 
+                channel_noise_level=0.0,
+                meas_active=meas_error_rate > 0,
+                meas_error_rate=meas_error_rate
+            )
+            noise_levels = [max(fixed_1q, fixed_2q)]  # Single point for plotting
     else:
-        cfg_builder = lambda noise: NoiseCfg(ec_active=True, ec_rate_1q=noise, ec_rate_2q=noise, channel_noise_level=0.0)
+        # Use original sweep behavior
+        if sweep_channel_noise:
+            cfg_builder = lambda noise: NoiseCfg(
+                ec_active=False, 
+                channel_noise_level=noise, 
+                channel_noise_type="DEPOLARIZE1",
+                meas_active=meas_error_rate > 0,
+                meas_error_rate=meas_error_rate
+            )
+        else:
+            cfg_builder = lambda noise: NoiseCfg(
+                ec_active=True, 
+                ec_rate_1q=noise, 
+                ec_rate_2q=noise, 
+                channel_noise_level=0.0,
+                meas_active=meas_error_rate > 0,
+                meas_error_rate=meas_error_rate
+            )
     
     raw_results = sweep_results(
         run_simulation_ec_experiment,
@@ -242,7 +306,9 @@ def plot_ec_experiment(
     write_experiment_metadata(
         out_dir, rounds, noise_levels, shots, 
         apply_pauli_frame, encoding_mode, sweep_channel_noise,
-        runtime_seconds=runtime_seconds
+        runtime_seconds=runtime_seconds,
+        ec_rate_1q=ec_rate_1q, ec_rate_2q=ec_rate_2q, 
+        meas_error_rate=meas_error_rate, channel_noise_rate=channel_noise_rate
     )
     
     print(f"All experiment files saved to: {out_dir}")
@@ -278,6 +344,14 @@ def main():
                       help=f'List of EC rounds to sweep (e.g. 1 10 20 30). Default: {default_rounds}')
     parser.add_argument('--noise-levels', type=float, nargs='+', default=default_noise_levels,
                       help=f'List of noise rates to sweep (e.g. 0.05 0.1 0.2). Default: 10 points from 0.0 to 0.01')
+    parser.add_argument('--ec-rate-1q', type=float, default=None,
+                      help='Single-qubit gate error rate for EC operations (overrides noise-levels sweep)')
+    parser.add_argument('--ec-rate-2q', type=float, default=None,
+                      help='Two-qubit gate error rate for EC operations (overrides noise-levels sweep)')
+    parser.add_argument('--meas-error-rate', type=float, default=0.0,
+                      help='Measurement error rate (SPAM error)')
+    parser.add_argument('--channel-noise-rate', type=float, default=None,
+                      help='Channel noise rate (overrides noise-levels sweep when using --sweep-channel-noise)')
     args = parser.parse_args()
 
     # Use configurable values
@@ -288,7 +362,11 @@ def main():
 
     print(args.experiments)
     if 2 in args.experiments:
-        plot_ec_experiment(rounds, noise_levels, args.shots, args.out_dir, args.apply_pauli_frame, args.encoding_mode, args.sweep_channel_noise)
+        plot_ec_experiment(
+            rounds, noise_levels, args.shots, args.out_dir, 
+            args.apply_pauli_frame, args.encoding_mode, args.sweep_channel_noise,
+            args.ec_rate_1q, args.ec_rate_2q, args.meas_error_rate, args.channel_noise_rate
+        )
 
 if __name__ == "__main__":
     main() 

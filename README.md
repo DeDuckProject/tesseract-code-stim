@@ -1,31 +1,53 @@
-# Stim implementation of the [[16,4,4]] Tesseract Code
+# Stim Implementation of the [[16,4,4]] Tesseract Code
 
-This repository contains implementations and simulations of the Tesseract quantum error correction code [[1]](#references) using Stim [[3]](#references).
+[![DOI](https://zenodo.org/badge/1014457478.svg)](https://doi.org/10.5281/zenodo.17137850)
 
 ## Overview
-### Motivation
-The 16-qubit tesseract subsystem color code offers a useful comprosmise between protection against errors and overhead. It encodes 4 logical qubits with a code rate of 1/4. By reducing 2 logical qubit from the original [[16,6,4]] code, this code achieves single-shot error correction, with only 2 ancilla qubits. This makes this code practical for current trapped-ion platforms. Recent experiments on Quantinuum hardware[[1]](#references) demonstrated preparing high-fidelity encoded graph states of up to 12 logical qubits, as well as protecting encoded states through 5 rounds of error correction. This repository reproduces these results in simulation, providing modular Stim circuits, noise modelling, and verification tests to support further research on low-overhead fault tolerance.
+• **What it is**: A complete Stim-based [[3]](#references) simulation of the Tesseract quantum error correction code [[1]](#references) with gate-level encoding, error correction rounds, and manual decoding.
+
+• **Why it matters**: The [[16,4,4]] Tesseract subsystem color code offers practical fault tolerance for NISQ devices; encoding 4 logical qubits with single-shot error correction using only 2 ancilla qubits. This makes it viable for current trapped-ion platforms and a stepping stone to larger codes.
+
+• **What's implemented**: Full error correction pipeline including two encoding modes, configurable noise, stabilizer measurement rounds, Pauli frame tracking, and acceptance/fidelity analysis.
+
+• **Validation status**: Error correction improves fidelity as expected, but quantitative reproduction of paper results is work-in-progress. Acceptance rates show correct trend but offset (~1.0 vs ~0.85 baseline); logical error rates have correct shape but ~10× scaling difference.
 
 ![Figure 1: Tesseract code structure (from [1])](docs/images/fig1_tesseract_code.png)
 
-### Project status
-This codebase is an active work-in-progress.  
-• All building blocks (encoding, noise, measurement, decoder) are implemented.  
-• The end-to-end error-correction success rate is **not yet at the target level**.
-Community testing, bug-fixes, and feature PRs are highly appreciated!
+## Reproduce the Paper
 
-**Disclaimer:** This repository is an independent, community-driven implementation.  
-It is **not** affiliated with Microsoft, Quantinuum, nor the authors of the original tesseract-code paper.
+To regenerate the main results with paper parameters:
+
+```bash
+python tesseract_sim/plotting/plot_acceptance_rates.py \
+  --shots 10000 \
+  --apply_pauli_frame true \
+  --encoding-mode 9a \
+  --ec-rate-1q 2.9e-5 \
+  --ec-rate-2q 1.15e-3 \
+  --meas-error-rate 1.47e-3 \
+  --rounds 0 1 2 3 4 5 6 7 8 9 10 15 20 25 30 35 40 45 50
+```
+
+**Requirements**: Python 3.8+, Stim 1.11+. Install via `pip install -r requirements.txt`.
+
+**Known differences from paper**:
+- Depolarizing noise model (vs. experimental noise)
+- Pauli frame correction applied post-measurement (vs. pre-measurement)
+- No memory decoherence during idle periods
+- Noiseless encoding to avoid preselection
+- Only two logical Z measurements (due to |++0000⟩ encoding split into [[8,3,2]] codes)
+
+**Disclaimer**: Independent implementation, not affiliated with Microsoft/Quantinuum/original authors.
 
 ### Features
 
-- Circuit implementation of the [[16,4,4]] Tesseract subsystem color code [[2]](#references) in Stim, including encoding, error correction rounds and final measurements.
+- Circuit implementation of the [[16,4,4]] Tesseract subsystem color code [[1]](#references) in Stim, including encoding, error correction rounds and final measurements.
 - Simulation of an error correction experiment with configurable noise setting, rounds, shot and more.
 - Plotting: sweeping of different parameters and obtaining acceptance rate and logical success rate.
 
 ### Implementation details
 
-In order to mimic the original paper's error correction, the different parts of the experiment are implemented in the gate level, and not using Stim's `MPP` stabilizer measurements, or detectors, for example.
+In order to mimic the original paper's error correction, the different parts of the experiment are implemented at the gate level.
 The experiment implemented here is an error correction experiment based on Microsoft's paper[[1]](#references), and resembles the experimental setup shown in Figure 8 below.
 
 ![Figure 8: Error correction experiment (from [1])](docs/images/fig8_error_correction_experiment.png)

@@ -1,11 +1,8 @@
-import stim
 import numpy as np
-from tesseract_sim.error_correction.correction_rules import correct_row_Z, correct_row_X, correct_column_Z, correct_column_X
 
-def append_detector_on_last_n_measurements(circuit, num_measurements=4):
-    circuit.append("DETECTOR", [
-        stim.target_rec(-i) for i in range(1,num_measurements+1)
-    ])
+from tesseract_sim.error_correction.correction_rules import correct_row_Z, correct_row_X, correct_column_Z, \
+    correct_column_X
+
 
 def process_shot(shot_data, rounds, measurement_offset=0):
     """
