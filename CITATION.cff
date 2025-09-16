@@ -6,7 +6,6 @@ abstract: "A complete Stim-based simulation of the Tesseract quantum error corre
 authors:
   - family-names: "Yakar"
     given-names: "Iftach"
-    orcid: "https://orcid.org/0000-0000-0000-0000"
 repository-code: "https://github.com/DeDuckProject/tesseract-code-stim"
 url: "https://github.com/DeDuckProject/tesseract-code-stim"
 license: MIT
