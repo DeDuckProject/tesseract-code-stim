@@ -1,0 +1,20 @@
+Tesseract EC Experiment Metadata
+===================================
+
+Timestamp: 2025-09-16 16:54:26
+Total runtime: 00:44:02.614 (2642.614 seconds)
+
+Experiment Parameters:
+--------------------
+Rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20]
+Noise levels: [np.float64(0.0), np.float64(0.0011111111111111111), np.float64(0.0022222222222222222), np.float64(0.003333333333333333), np.float64(0.0044444444444444444), np.float64(0.005555555555555556), np.float64(0.006666666666666666), np.float64(0.0077777777777777776), np.float64(0.008888888888888889), np.float64(0.01)]
+Shots per data point: 1000000
+Apply Pauli frame correction: True
+Encoding mode: 9a
+Sweep channel noise: False
+Noise configuration: Sweeping EC/decoding noise
+  - EC noise applied: During error correction rounds and decoding
+  - EC 1Q rate: Swept parameter
+  - EC 2Q rate: Swept parameter (same as 1Q)
+  - Channel noise: None (0.0)
+  - Encoding: Noiseless

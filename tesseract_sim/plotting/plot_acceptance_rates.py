@@ -207,7 +207,7 @@ def plot_ec_experiment(
         ylabel="EC Acceptance Rate",
         out_path=os.path.join(out_dir, 'acceptance_rates_ec_experiment.png'),
         xlim=x_range,
-        ylim=(0, 1)
+        ylim=(-0.01, 1.01)
     )
 
     # Derive logical check rate from same raw results - normalized by acceptance
@@ -219,7 +219,7 @@ def plot_ec_experiment(
         ylabel="Logical Success Rate | Accepted",
         out_path=os.path.join(out_dir, 'logical_rates_ec_experiment.png'),
         xlim=x_range,
-        ylim=(0, 1)
+        ylim=(-0.01, 1.01)
     )
 
     # Derive average fidelity from same raw results
@@ -231,7 +231,7 @@ def plot_ec_experiment(
         ylabel="Average Fidelity",
         out_path=os.path.join(out_dir, 'fidelity_rates_ec_experiment.png'),
         xlim=x_range,
-        ylim=(0.45, 1)
+        ylim=(0.45, 1.01)
     )
     
     # Calculate total runtime and update metadata
