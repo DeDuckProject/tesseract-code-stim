@@ -107,13 +107,25 @@ def verify_final_state(shot_tail, frameX=None, frameZ=None, apply_pauli_frame = 
     
     if apply_pauli_frame:
         if frameX is not None and frameZ is not None:
-            # Top half measured in X basis - apply X frame corrections (only LSB matters)
+            # Top half measured in X basis - apply Z frame corrections (phase errors affect X measurements)
             for i in range(8):
-                corrected[i] ^= (frameX[i] & 1)
-
-            # Bottom half measured in Z basis - apply Z frame corrections (only LSB matters)
-            for i in range(8, 16):
                 corrected[i] ^= (frameZ[i] & 1)
+
+            # Bottom half measured in Z basis - apply X frame corrections (bit flips affect Z measurements)
+            # Account for CNOT propagation: X errors on qubits 0-3 propagate to 12-15, and 4-7 propagate to 8-11
+            for i in range(8, 16):
+                # Direct X frame corrections for qubits 8-15
+                corrected[i] ^= (frameX[i] & 1)
+                
+                # CNOT propagation: X errors from row 1 (0-3) propagate to row 4 (12-15)
+                if 12 <= i <= 15:
+                    source_qubit = i - 12  # qubit 12→0, 13→1, 14→2, 15→3
+                    corrected[i] ^= (frameX[source_qubit] & 1)
+                
+                # CNOT propagation: X errors from row 2 (4-7) propagate to row 3 (8-11)
+                if 8 <= i <= 11:
+                    source_qubit = i - 4   # qubit 8→4, 9→5, 10→6, 11→7
+                    corrected[i] ^= (frameX[source_qubit] & 1)
 
     # Calculate all operator parities for both 8-3-2 color codes
     # X measurements (top half, qubits 0-7)
