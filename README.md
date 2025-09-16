@@ -10,9 +10,27 @@ The 16-qubit tesseract subsystem color code offers a useful comprosmise between 
 
 ### Project status
 This codebase is an active work-in-progress.  
-• All building blocks (encoding, noise, measurement, decoder) are implemented.  
-• The end-to-end error-correction success rate is **not yet at the target level**.
+• All building blocks (encoding, noise, measurement, decoder) are implemented, connected and working together.
+• Error correction does improve fidelity, but we have not yet reproduced Fig. 13 of the paper. Acceptance rate plot has matching shape, but start too high (at ~1 instead of ~0.85). Logical error probability plots have the correct shapes, but are off by ~x10.
+To reproduce run
+```bash
+python tesseract_sim/plotting/plot_acceptance_rates.py \
+  --shots 10000 \
+  --apply_pauli_frame true \
+  --encoding-mode 9a \
+  --ec-rate-1q 2.9e-5 \
+  --ec-rate-2q 1.15e-3 \
+  --meas-error-rate 1.47e-3 \
+  --rounds 0 1 2 3 4 5 6 7 8 9 10 15 20 25 30 35 40 45 50
+```
 Community testing, bug-fixes, and feature PRs are highly appreciated!
+
+#### Known differences from the paper
+- Noise model: we use depolarizing noise.
+- Pauli frame correction is applied after measurement, rather than before.
+- Memory decoherence: we have not implemented any noise for idling qubits, only for gates, in contrast with real devices.
+- Encoding - noiseless in our model, to avoid having to preselect.
+- Logical measurements - we currently only measure two logical Z observables. This is because we use enconding |++0000> but measure by splitting the code into two [[8,3,2]] color codes.
 
 **Disclaimer:** This repository is an independent, community-driven implementation.  
 It is **not** affiliated with Microsoft, Quantinuum, nor the authors of the original tesseract-code paper.
