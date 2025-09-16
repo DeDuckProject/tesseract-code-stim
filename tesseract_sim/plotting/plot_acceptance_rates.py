@@ -5,6 +5,8 @@ from tesseract_sim.noise.noise_cfg import NoiseCfg
 import os
 from typing import Callable, Dict, List, TypeVar, Tuple, Literal
 import argparse
+from datetime import datetime
+import time
 
 T = TypeVar('T')  # Type of experiment result
 
@@ -100,16 +102,72 @@ def plot_curve(
     plt.close()
 
 
+def write_experiment_metadata(
+    out_dir: str,
+    rounds: List[int],
+    noise_levels: List[float],
+    shots: int,
+    apply_pauli_frame: bool,
+    encoding_mode: str,
+    sweep_channel_noise: bool,
+    runtime_seconds: float = None
+) -> None:
+    """Write experiment metadata to a text file."""
+    metadata_path = os.path.join(out_dir, "experiment_metadata.txt")
+    
+    with open(metadata_path, 'w') as f:
+        f.write("Tesseract EC Experiment Metadata\n")
+        f.write("=" * 35 + "\n\n")
+        f.write(f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        if runtime_seconds is not None:
+            hours = int(runtime_seconds // 3600)
+            minutes = int((runtime_seconds % 3600) // 60)
+            seconds = runtime_seconds % 60
+            f.write(f"Total runtime: {hours:02d}:{minutes:02d}:{seconds:06.3f} ({runtime_seconds:.3f} seconds)\n")
+        f.write("\n")
+        
+        f.write("Experiment Parameters:\n")
+        f.write("-" * 20 + "\n")
+        f.write(f"Rounds: {rounds}\n")
+        f.write(f"Noise levels: {list(noise_levels)}\n")
+        f.write(f"Shots per data point: {shots}\n")
+        f.write(f"Apply Pauli frame correction: {apply_pauli_frame}\n")
+        f.write(f"Encoding mode: {encoding_mode}\n")
+        f.write(f"Sweep channel noise: {sweep_channel_noise}\n")
+        
+        if sweep_channel_noise:
+            f.write(f"Noise configuration: Sweeping channel noise only\n")
+            f.write(f"  - Channel noise type: DEPOLARIZE1\n")
+            f.write(f"  - Channel noise applied: After encoding, before EC rounds\n")
+            f.write(f"  - EC procedures: Noiseless\n")
+            f.write(f"  - Encoding/Decoding: Noiseless\n")
+        else:
+            f.write(f"Noise configuration: Sweeping EC/decoding noise\n")
+            f.write(f"  - EC noise applied: During error correction rounds and decoding\n")
+            f.write(f"  - EC 1Q rate: Swept parameter\n")
+            f.write(f"  - EC 2Q rate: Swept parameter (same as 1Q)\n")
+            f.write(f"  - Channel noise: None (0.0)\n")
+            f.write(f"  - Encoding: Noiseless\n")
+    
+    print(f"Metadata saved to {metadata_path}")
+
 def plot_ec_experiment(
     rounds: List[int],
     noise_levels: List[float],
     shots: int,
-    out_dir: str,
+    base_out_dir: str,
     apply_pauli_frame: bool = True,
     encoding_mode: Literal['9a', '9b'] = '9b',
     sweep_channel_noise: bool = False
 ) -> None:
     """Plots both EC acceptance and logical check rates for the EC experiment."""
+    start_time = time.time()
+    
+    # Create timestamped output directory
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    out_dir = os.path.join(base_out_dir, f"ec_experiment_{timestamp}")
+    os.makedirs(out_dir, exist_ok=True)
+    
     # One sweep collecting full results
     if sweep_channel_noise:
         cfg_builder = lambda noise: NoiseCfg(ec_active=False, channel_noise_level=noise, channel_noise_type="DEPOLARIZE1")
@@ -135,7 +193,7 @@ def plot_ec_experiment(
         rounds, ec_data,
         title=f"{noise_type} Acceptance vs Rounds (EC Experiment)",
         ylabel="EC Acceptance Rate",
-        out_path=os.path.join(out_dir, f'acceptance_rates_{"channel" if sweep_channel_noise else "ec"}_noise_ec_experiment.png')
+        out_path=os.path.join(out_dir, 'acceptance_rates_ec_experiment.png')
     )
 
     # Derive logical check rate from same raw results - normalized by acceptance
@@ -145,7 +203,7 @@ def plot_ec_experiment(
         rounds, logical_data,
         title=f"Logical Check Success vs Rounds (EC Experiment) - {noise_type} Noise",
         ylabel="Logical Success Rate | Accepted",
-        out_path=os.path.join(out_dir, f'logical_rates_{"channel" if sweep_channel_noise else "ec"}_noise_ec_experiment.png')
+        out_path=os.path.join(out_dir, 'logical_rates_ec_experiment.png')
     )
 
     # Derive average fidelity from same raw results
@@ -155,8 +213,22 @@ def plot_ec_experiment(
         rounds, fidelity_data,
         title=f"Average Fidelity vs Rounds (EC Experiment) - {noise_type} Noise",
         ylabel="Average Fidelity",
-        out_path=os.path.join(out_dir, f'fidelity_rates_{"channel" if sweep_channel_noise else "ec"}_noise_ec_experiment.png')
+        out_path=os.path.join(out_dir, 'fidelity_rates_ec_experiment.png')
     )
+    
+    # Calculate total runtime and update metadata
+    end_time = time.time()
+    runtime_seconds = end_time - start_time
+    
+    # Write final metadata with runtime
+    write_experiment_metadata(
+        out_dir, rounds, noise_levels, shots, 
+        apply_pauli_frame, encoding_mode, sweep_channel_noise,
+        runtime_seconds=runtime_seconds
+    )
+    
+    print(f"All experiment files saved to: {out_dir}")
+    print(f"Total experiment runtime: {runtime_seconds:.1f} seconds")
 
 def str_to_bool(v):
     """Convert string to boolean for argparse."""
@@ -176,7 +248,7 @@ def main():
     parser.add_argument('--shots', type=int, default=10000,
                       help='Number of shots per data point')
     parser.add_argument('--out-dir', type=str, default='../plots',
-                      help='Output directory for plots')
+                      help='Base output directory for plots (timestamped subdirectory will be created)')
     parser.add_argument('--apply_pauli_frame', type=str_to_bool, default=False, help='Perform final correction - apply the measured Pauli frame. The error correction rounds and measurements (besides the actual correction at the end) happen regardless, based on the number of rounds.')
     parser.add_argument('--encoding-mode', type=str, choices=['9a', '9b'], default='9a', help='Encoding mode')
     parser.add_argument('--sweep-channel-noise', action='store_true', help='Sweep channel noise instead of EC noise. Channel noise acts once after encoding and before the error correction rounds.')
