@@ -116,4 +116,73 @@ def test_single_z_error_correction():
     assert ec_accept == 100, f"Expected all shots accepted, got {ec_accept}"
     # All shots should pass logical check after Pauli frame correction
     assert logical_pass == 100, f"Expected all shots to pass logical check, got {logical_pass}"
-    assert average_percentage == 1.0, f"Expected 100% average success rate, got {average_percentage:.2%}" 
+    assert average_percentage == 1.0, f"Expected 100% average success rate, got {average_percentage:.2%}"
+
+
+# Qubit pairs for testing double error rejection
+# Two-row pairs: same column, different rows (causes row stabilizers to fire)
+TWO_ROW_PAIRS = [(0, 4), (5, 9), (10, 14), (3, 7)]
+# Two-column pairs: same row, different columns (causes column stabilizers to fire)  
+TWO_COL_PAIRS = [(0, 1), (5, 6), (10, 11), (12, 13)]
+
+
+@pytest.mark.parametrize("q1,q2", TWO_ROW_PAIRS)
+@pytest.mark.parametrize("pauli_gate", ["Z", "X"])
+def test_two_row_errors_rejection(q1, q2, pauli_gate):
+    """
+    Test that two Pauli errors in the same column but different rows get rejected.
+    
+    This causes two different row stabilizers to fire, which should be rejected
+    when no flag was previously set (sum==2 with flag=-1).
+    """
+    # Build encoding circuit with no noise
+    circuit = build_encoding_circuit(NO_NOISE, '9a')
+    
+    # Inject two identical Pauli errors in same column, different rows
+    circuit.append(pauli_gate, [q1])
+    circuit.append(pauli_gate, [q2])
+    
+    # Build error correction circuit
+    build_error_correction_circuit(NO_NOISE, circuit, rounds=1)
+    
+    # Run simulation with 9a encoding mode
+    ec_accept, logical_pass, average_percentage = run_manual_error_correction(
+        circuit, shots=5, rounds=1, encoding_mode='9a'
+    )
+    
+    # Should be rejected since two row stabilizers fire without prior flag
+    assert ec_accept == 0, (
+        f"Expected rejection for {pauli_gate} errors on qubits {q1},{q2} "
+        f"(same column, different rows), got {ec_accept}/5 accepted"
+    )
+
+
+@pytest.mark.parametrize("q1,q2", TWO_COL_PAIRS)
+@pytest.mark.parametrize("pauli_gate", ["Z", "X"])
+def test_two_column_errors_rejection(q1, q2, pauli_gate):
+    """
+    Test that two Pauli errors in the same row but different columns get rejected.
+    
+    This causes two different column stabilizers to fire, which should be rejected
+    when no flag was previously set (sum==2 with flag=-1).
+    """
+    # Build encoding circuit with no noise
+    circuit = build_encoding_circuit(NO_NOISE, '9a')
+    
+    # Inject two identical Pauli errors in same row, different columns
+    circuit.append(pauli_gate, [q1])
+    circuit.append(pauli_gate, [q2])
+    
+    # Build error correction circuit
+    build_error_correction_circuit(NO_NOISE, circuit, rounds=1)
+    
+    # Run simulation with 9a encoding mode
+    ec_accept, logical_pass, average_percentage = run_manual_error_correction(
+        circuit, shots=5, rounds=1, encoding_mode='9a'
+    )
+    
+    # Should be rejected since two column stabilizers fire without prior flag
+    assert ec_accept == 0, (
+        f"Expected rejection for {pauli_gate} errors on qubits {q1},{q2} "
+        f"(same row, different columns), got {ec_accept}/5 accepted"
+    )
