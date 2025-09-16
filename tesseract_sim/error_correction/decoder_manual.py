@@ -116,12 +116,17 @@ def verify_final_state(shot_tail, frameX=None, frameZ=None, apply_pauli_frame = 
             for i in range(8, 16):
                 # Direct X frame corrections for qubits 8-15
                 corrected[i] ^= (frameX[i] & 1)
-                
+
+                """ These workarounds are needed because we actually need to apply the correction before measurement.
+                A more complete and correct approach would be to branch insert the python error correction code before the final measurements
+                See https://quantumcomputing.stackexchange.com/questions/22281/simulating-flag-qubits-and-conditional-branches-using-stim
+                For more information.
+                """
                 # CNOT propagation: X errors from row 1 (0-3) propagate to row 4 (12-15)
                 if 12 <= i <= 15:
                     source_qubit = i - 12  # qubit 12→0, 13→1, 14→2, 15→3
                     corrected[i] ^= (frameX[source_qubit] & 1)
-                
+
                 # CNOT propagation: X errors from row 2 (4-7) propagate to row 3 (8-11)
                 if 8 <= i <= 11:
                     source_qubit = i - 4   # qubit 8→4, 9→5, 10→6, 11→7
