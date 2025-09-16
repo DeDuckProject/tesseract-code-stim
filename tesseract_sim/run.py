@@ -13,9 +13,27 @@ def build_circuit_ec_experiment(rounds: int, cfg: NoiseCfg = NO_NOISE, encoding_
     # Here we can use either Fig 9a encoding (|++0000>) or Fig 9b encoding (|+0+0+0>)
     # depending on the encoding_mode parameter.
 
+    circuit = build_encoding_circuit(cfg, encoding_mode)
+    # -----------------------------
+
+    if cfg.channel_noise_level > 0:
+        # Now, apply noise to the encoded state
+        channel(circuit, cfg.channel_noise_level, noise_type=cfg.channel_noise_type)
+
+    build_error_correction_circuit(cfg, circuit, rounds)
+
+    return circuit
+
+
+def build_error_correction_circuit(cfg, circuit, rounds):
+    # Append the error correction rounds to the circuit
+    error_correct_manual(circuit, rounds=rounds, cfg=cfg)
+    measure_logical_operators_tesseract(circuit, cfg=cfg)
+
+
+def build_encoding_circuit(cfg, encoding_mode):
     # We start with a fresh circuit
     circuit = init_circuit(qubits=16, ancillas=2)
-
     # First, prepare a valid encoded state based on encoding mode
     if encoding_mode == '9a':
         encode_manual_fig9a(circuit, cfg=cfg)
@@ -23,17 +41,6 @@ def build_circuit_ec_experiment(rounds: int, cfg: NoiseCfg = NO_NOISE, encoding_
         encode_manual_fig9b(circuit, cfg=cfg)
     else:
         raise ValueError(f"Invalid encoding_mode: {encoding_mode}. Must be '9a' or '9b'")
-    # -----------------------------
-
-    if cfg.channel_noise_level > 0:
-        # Now, apply noise to the encoded state
-        channel(circuit, cfg.channel_noise_level, noise_type=cfg.channel_noise_type)
-
-    # Append the error correction rounds to the circuit
-    error_correct_manual(circuit, rounds=rounds, cfg=cfg)
-
-    measure_logical_operators_tesseract(circuit, cfg=cfg)
-
     return circuit
 
 

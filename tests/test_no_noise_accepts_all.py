@@ -5,7 +5,7 @@ def test_no_noise_accepts_all():
     """
     Given no noise, the simulation should accept all shots.
     """
-    ec_accept, logical_pass, logical_fail = run_simulation_ec_experiment(
+    ec_accept, logical_pass, average_percentage = run_simulation_ec_experiment(
         rounds=1, 
         shots=100, 
         cfg=NO_NOISE,
@@ -15,4 +15,4 @@ def test_no_noise_accepts_all():
     assert ec_accept == 100
     # With no noise, all accepted shots should pass logical checks
     assert logical_pass == 100
-    assert logical_fail == 0 
+    assert average_percentage == 1.0  # 100% success rate 

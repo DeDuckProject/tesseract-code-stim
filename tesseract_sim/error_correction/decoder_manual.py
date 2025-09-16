@@ -107,13 +107,30 @@ def verify_final_state(shot_tail, frameX=None, frameZ=None, apply_pauli_frame = 
     
     if apply_pauli_frame:
         if frameX is not None and frameZ is not None:
-            # Top half measured in X basis - apply X frame corrections (only LSB matters)
+            # Top half measured in X basis - apply Z frame corrections (phase errors affect X measurements)
             for i in range(8):
+                corrected[i] ^= (frameZ[i] & 1)
+
+            # Bottom half measured in Z basis - apply X frame corrections (bit flips affect Z measurements)
+            # Account for CNOT propagation: X errors on qubits 0-3 propagate to 12-15, and 4-7 propagate to 8-11
+            for i in range(8, 16):
+                # Direct X frame corrections for qubits 8-15
                 corrected[i] ^= (frameX[i] & 1)
 
-            # Bottom half measured in Z basis - apply Z frame corrections (only LSB matters)
-            for i in range(8, 16):
-                corrected[i] ^= (frameZ[i] & 1)
+                """ These workarounds are needed because we actually need to apply the correction before measurement.
+                A more complete and correct approach would be to branch insert the python error correction code before the final measurements
+                See https://quantumcomputing.stackexchange.com/questions/22281/simulating-flag-qubits-and-conditional-branches-using-stim
+                For more information.
+                """
+                # CNOT propagation: X errors from row 1 (0-3) propagate to row 4 (12-15)
+                if 12 <= i <= 15:
+                    source_qubit = i - 12  # qubit 12→0, 13→1, 14→2, 15→3
+                    corrected[i] ^= (frameX[source_qubit] & 1)
+
+                # CNOT propagation: X errors from row 2 (4-7) propagate to row 3 (8-11)
+                if 8 <= i <= 11:
+                    source_qubit = i - 4   # qubit 8→4, 9→5, 10→6, 11→7
+                    corrected[i] ^= (frameX[source_qubit] & 1)
 
     # Calculate all operator parities for both 8-3-2 color codes
     # X measurements (top half, qubits 0-7)
@@ -147,7 +164,6 @@ def verify_final_state(shot_tail, frameX=None, frameZ=None, apply_pauli_frame = 
 def run_manual_error_correction(circuit, shots, rounds, apply_pauli_frame = True, encoding_mode ='9b'):
     """
     Runs the full manual error correction simulation with final logical state verification.
-    Returns counts of shots that pass error correction and total successful parity checks.
     
     Args:
         circuit: The quantum circuit to simulate
@@ -155,10 +171,17 @@ def run_manual_error_correction(circuit, shots, rounds, apply_pauli_frame = True
         rounds: Number of error correction rounds
         apply_pauli_frame: Whether to apply Pauli frame corrections
         encoding_mode: '9a' or '9b' - determines measurement offset and which parity checks to perform
+    
+    Returns:
+        tuple: (ec_accept, logical_shots_passed, average_percentage)
+            - ec_accept: number of successful experiments (i.e all rounds of ec "accept")
+            - logical_shots_passed: number of experiments when the final logical qubits measured had all qubits in the ideal state
+            - average_percentage: average percentage of qubits measured correctly across all shots
     """
     # Calculate parameters based on encoding mode
     only_z_checks = (encoding_mode == '9a')
     measurement_offset = 0 if encoding_mode == '9a' else 2
+    max_checks = 2 if only_z_checks else 4
     
     sampler = circuit.compile_sampler()
     shot_data_all = sampler.sample(shots=shots)
@@ -166,6 +189,7 @@ def run_manual_error_correction(circuit, shots, rounds, apply_pauli_frame = True
     ec_accept = 0
     logical_shots_passed = 0
     total_successful_checks = 0
+    fractional_logical_passed = 0.0
 
     for shot_data in shot_data_all:
         # Process error correction rounds with appropriate measurement offset
@@ -178,19 +202,23 @@ def run_manual_error_correction(circuit, shots, rounds, apply_pauli_frame = True
             total_successful_checks += successful_checks
             
             # Count shots where all parity checks pass
-            max_checks = 2 if only_z_checks else 4
             if successful_checks == max_checks:
                 logical_shots_passed += 1
+            
+            # Add fractional contribution for average percentage calculation
+            fractional_logical_passed += successful_checks / max_checks
 
-    # Calculate normalized logical success rate (total successful checks / total possible checks)
-    max_checks = 2 if only_z_checks else 4
-    normalized_logical_rate = total_successful_checks / (shots * max_checks) if shots > 0 else 0
+    # Calculate average percentage of qubits measured correctly
+    average_percentage = fractional_logical_passed / ec_accept if ec_accept > 0 else None
 
     print(f"Correcting by Pauli frame → {apply_pauli_frame}")
     print(f"After EC rounds → {ec_accept}/{shots} accepted")
     checks_desc = "Z3,Z5" if only_z_checks else "X4,X6,Z3,Z5"
     print(f"Total successful parity checks ({checks_desc}) → {total_successful_checks}/{shots * max_checks}")
-    print(f"Normalized logical success rate → {normalized_logical_rate:.2%}")
+    if average_percentage is not None:
+        print(f"Average percentage of checks passed → {average_percentage:.2%}")
+    else:
+        print(f"Average percentage of checks passed → N/A (no accepted shots)")
     print(f"Logical shots passed (all checks) → {logical_shots_passed}/{shots}")
 
-    return ec_accept, logical_shots_passed, shots - logical_shots_passed 
+    return ec_accept, logical_shots_passed, average_percentage 

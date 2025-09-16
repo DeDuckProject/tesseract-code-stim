@@ -8,11 +8,11 @@ def test_ec_experiment_no_noise_accepts_all():
     shots = 100
     rounds = 3
     
-    ec_accept, logical_pass, logical_fail = run_simulation_ec_experiment(rounds=rounds, shots=shots, cfg=NO_NOISE, encoding_mode='9a')
+    ec_accept, logical_pass, average_percentage = run_simulation_ec_experiment(rounds=rounds, shots=shots, cfg=NO_NOISE, encoding_mode='9a')
     
     assert ec_accept == shots, "All shots should pass error correction with no noise"
     assert logical_pass == shots, "All shots should pass logical verification with no noise"
-    assert logical_fail == 0, "No shots should fail logical verification with no noise"
+    assert average_percentage == 1.0, "Average percentage should be 100% with no noise"
 
 # TODO: Enable and fix this test to ensure it works correctly. currently the 9b encoding/measurement is incorrect and we don't get correct results even without noise.
 def disabled_test_ec_experiment_no_noise_encoding_9b():
@@ -22,8 +22,8 @@ def disabled_test_ec_experiment_no_noise_encoding_9b():
     shots = 100
     rounds = 3
 
-    ec_accept, logical_pass, logical_fail = run_simulation_ec_experiment(rounds=rounds, shots=shots, cfg=NO_NOISE, encoding_mode='9b')
+    ec_accept, logical_pass, average_percentage = run_simulation_ec_experiment(rounds=rounds, shots=shots, cfg=NO_NOISE, encoding_mode='9b')
 
     assert ec_accept == shots, "All shots should pass error correction with no noise"
     assert logical_pass == shots, "All shots should pass logical verification with no noise"
-    assert logical_fail == 0, "No shots should fail logical verification with no noise"
+    assert average_percentage == 1.0, "Average percentage should be 100% with no noise"
