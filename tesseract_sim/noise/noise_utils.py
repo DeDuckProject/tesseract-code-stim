@@ -8,7 +8,7 @@ def append_op(
     circuit: stim.Circuit,
     opname: str,
     targets: Sequence[int],
-    phase: Literal['enc', 'ec'],
+    phase: Literal['enc', 'ec', 'meas'],
     cfg: NoiseCfg = CURRENT_NOISE_CFG
 ):
     circuit.append(opname, targets)
@@ -27,6 +27,10 @@ def append_op(
         active_noise = True
         rate_1q = cfg.ec_rate_1q
         rate_2q = cfg.ec_rate_2q
+    elif phase == 'meas' and cfg.meas_active:
+        active_noise = True
+        rate_1q = cfg.meas_error_rate
+        rate_2q = cfg.meas_error_rate  # Use same rate for consistency
 
     if active_noise:
         if len(targets) == 1 and rate_1q > 0:
@@ -34,8 +38,8 @@ def append_op(
         elif len(targets) > 1 and rate_2q > 0:
             circuit.append(op2, targets, rate_2q)
 
-def append_1q(circuit: stim.Circuit, opname: str, target: int, phase: Literal['enc', 'ec'], cfg: NoiseCfg = CURRENT_NOISE_CFG):
+def append_1q(circuit: stim.Circuit, opname: str, target: int, phase: Literal['enc', 'ec', 'meas'], cfg: NoiseCfg = CURRENT_NOISE_CFG):
     append_op(circuit, opname, [target], phase, cfg)
 
-def append_2q(circuit: stim.Circuit, opname: str, target1: int, target2: int, phase: Literal['enc', 'ec'], cfg: NoiseCfg = CURRENT_NOISE_CFG):
+def append_2q(circuit: stim.Circuit, opname: str, target1: int, target2: int, phase: Literal['enc', 'ec', 'meas'], cfg: NoiseCfg = CURRENT_NOISE_CFG):
     append_op(circuit, opname, [target1, target2], phase, cfg) 

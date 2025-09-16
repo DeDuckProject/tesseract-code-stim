@@ -13,6 +13,8 @@ class NoiseCfg:
     op2: str = "DEPOLARIZE2"
     channel_noise_level: float = 0.0   # channel noise between encoding and EC
     channel_noise_type: str = "DEPOLARIZE1"
+    meas_active: bool = False          # apply to measurements (SPAM error)?
+    meas_error_rate: float = 0.0       # measurement error rate
 
 # TODO add noise on 'meas' phase as well
 
