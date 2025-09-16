@@ -83,6 +83,33 @@ tesseract-code-stim/
 - **`notebooks/`**: Interactive Jupyter notebooks for experiments and visualization
 - **`tests/`**: Comprehensive test suite covering all major functionality
 
+## Results
+
+### Error Correction Demonstration
+
+First, we show the acceptance rates across different noise levels and number of error correction rounds:
+
+![Acceptance Rates vs Error Correction Noise](plots/acceptance_rates_ec_experiment.png)
+
+The plots below demonstrate the error correction procedure by comparing fidelity with and without Pauli frame correction applied. Both experiment run the full error correction rounds, but only the experiment plotted in the left plot applies the corrections based on the accumulated Pauli frame.
+
+<table>
+<tr>
+<td align="center">
+<img src="plots/fidelity_rates_ec_experiment_with_correction.png" alt="Fidelity rates with correction" width="400"/>
+<br/>
+<b>With Pauli Frame Correction</b>
+</td>
+<td align="center">
+<img src="plots/fidelity_rates_ec_experiment_without_correction.png" alt="Fidelity rates without correction" width="400"/>
+<br/>
+<b>Without Pauli Frame Correction</b>
+</td>
+</tr>
+</table>
+
+This comparison clearly shows that the error correction procedure manages to correct some of the errors and achieve higher fidelity across different noise levels and number of error correction rounds.
+
 ## Quick Start
 
 ### Installation
@@ -179,13 +206,10 @@ The `plotting/plot_acceptance_rates.py` script generates acceptance and logical 
     python tesseract_sim/plotting/plot_acceptance_rates.py --rounds 1 5 10 20 --noise-levels 0.01 0.05 0.1 --shots 1000
     ```
 
-The script generates two types of plots:
+The script generates three types of plots:
 - **Acceptance Rate Plots**: Show how well the error correction accepts states across different noise levels and rounds
-- **Logical Success Rate Plots**: Show the conditional probability of logical success given acceptance
-
-**Example Results:**
-
-![Acceptance Rates vs Error Correction Noise](plots/acceptance_rates_ec_noise_ec_experiment.png)
+- **Logical Success Rate Plots**: Show the conditional probability of logical success given acceptance. Logical success is defined here as all qubits are measured to be in the correct state.
+- **Fidelity Rate Plots**: Show the average fidelity of the measured logical state within the shots that were not rejected. 
 
 ## References
 
