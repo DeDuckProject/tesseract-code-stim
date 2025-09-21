@@ -42,6 +42,7 @@ python tesseract_sim/plotting/plot_acceptance_rates.py \
 ### Features
 
 - Circuit implementation of the [[16,4,4]] Tesseract subsystem color code [[1]](#references) in Stim, including encoding, error correction rounds and final measurements.
+- Pre-generated stim circuit files for common operations (see [`stim_circuits/`](stim_circuits/README.md) directory).
 - Simulation of an error correction experiment with configurable noise setting, rounds, shot and more.
 - Plotting: sweeping of different parameters and obtaining acceptance rate and logical success rate.
 
@@ -82,6 +83,13 @@ tesseract-code-stim/
 │   ├── plotting/            # Visualization and analysis
 │   │   └── plot_acceptance_rates.py  # Generate acceptance/success rate plots
 │   └── run.py               # Main simulation entry point
+├── stim_circuits/           # Pre-generated stim circuit files
+│   ├── encoding_9a.stim     # Encoding circuit for |++0000⟩ state
+│   ├── encoding_9b.stim     # Encoding circuit for |+0+0+0⟩ state
+│   ├── error_correction_round.stim  # Single EC round circuit
+│   ├── decoding.stim        # Final measurement and decoding
+│   ├── complete_experiment_*.stim   # Full experiment pipelines
+│   └── README.md            # Stim circuits documentation and usage
 ├── notebooks/               # Jupyter notebooks for experiments
 │   ├── encoding_circuits_visualization.ipynb    # Circuit visualization
 │   ├── entire_experiment_circuit.ipynb          # Complete experiment demo
@@ -102,6 +110,7 @@ tesseract-code-stim/
 - **`tesseract_sim/error_correction/`**: Manual decoder with correction rules and measurement rounds
 - **`tesseract_sim/noise/`**: Configurable noise injection for encoding and error correction phases
 - **`tesseract_sim/plotting/`**: Analysis and visualization tools for acceptance rates and logical success rates
+- **`stim_circuits/`**: Pre-generated stim circuit files for direct use with stim or other simulators
 - **`notebooks/`**: Interactive Jupyter notebooks for experiments and visualization
 - **`tests/`**: Comprehensive test suite covering all major functionality
 
