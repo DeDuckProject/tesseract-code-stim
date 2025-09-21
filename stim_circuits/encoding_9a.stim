@@ -1,0 +1,45 @@
+# Encoding 9a circuit (|++0000> state)
+# Generated from tesseract-code-stim project
+# Circuit has 23 qubits total
+# 
+# Qubit layout:
+# - Qubits 0-15: Data qubits arranged in 4x4 grid
+# - Qubits 16+: Ancilla qubits for measurements
+#
+# Coordinate system:
+# - Qubits 0-3: row 1 (y=0, x=0-3)
+# - Qubits 4-7: row 2 (y=1, x=0-3) 
+# - Qubits 8-11: row 3 (y=2, x=0-3)
+# - Qubits 12-15: row 4 (y=3, x=0-3)
+#
+
+QUBIT_COORDS(0, 0) 0
+QUBIT_COORDS(1, 0) 1
+QUBIT_COORDS(2, 0) 2
+QUBIT_COORDS(3, 0) 3
+QUBIT_COORDS(0, 1) 4
+QUBIT_COORDS(1, 1) 5
+QUBIT_COORDS(2, 1) 6
+QUBIT_COORDS(3, 1) 7
+QUBIT_COORDS(0, 2) 8
+QUBIT_COORDS(1, 2) 9
+QUBIT_COORDS(2, 2) 10
+QUBIT_COORDS(3, 2) 11
+QUBIT_COORDS(0, 3) 12
+QUBIT_COORDS(1, 3) 13
+QUBIT_COORDS(2, 3) 14
+QUBIT_COORDS(3, 3) 15
+QUBIT_COORDS(5, 0) 16
+QUBIT_COORDS(5, 1) 17
+QUBIT_COORDS(5, 2) 18
+QUBIT_COORDS(5, 3) 19
+QUBIT_COORDS(5, 4) 20
+QUBIT_COORDS(5, 5) 21
+QUBIT_COORDS(5, 6) 22
+TICK                    # Start encoding based on Fig. 9a
+H 0 1 2 3 4 8 12
+CX 4 20 4 5 4 6 4 7 4 20 8 21 8 9 8 10 8 11 8 21 12 22 12 13 12 14 12 15 12 22 0 16 1 17 2 18 3 19 0 4 1 5 2 6 3 7 0 8 1 9 2 10 3 11 0 12 1 13 2 14 3 15 0 16 1 17 2 18 3 19
+R 18 19
+H 19
+CX 19 18 19 0 19 1 19 2 19 3 19 18
+TICK
