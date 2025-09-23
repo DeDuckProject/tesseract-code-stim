@@ -8,6 +8,9 @@ import argparse
 from datetime import datetime
 import time
 
+# Add imports for capturing the CLI invocation
+import sys, shlex
+
 T = TypeVar('T')  # Type of experiment result
 
 def sweep_results(
@@ -85,13 +88,28 @@ def plot_curve(
     ylabel: str,
     out_path: str,
     xlim: Tuple[float, float] = None,
-    ylim: Tuple[float, float] = None
+    ylim: Tuple[float, float] = None,
+    comparison_data: Dict[float, List[float]] = None,
+    comparison_label: str = None
 ) -> None:
-    """Plots and saves a single curve from sweep data."""
+    """Plots and saves a single curve from sweep data.
+    
+    Args:
+        comparison_data: Optional second dataset for comparison (plotted with dashed lines)
+        comparison_label: Label suffix for comparison data
+    """
     plt.figure(figsize=(12, 8))
     
+    # Plot main data with solid lines
     for noise, rates in data.items():
-        plt.plot(rounds, rates, marker='o', label=f'EC Noise Rate={noise:.4f}')
+        plt.plot(rounds, rates, marker='o', linestyle='-', 
+                label=f'EC Noise Rate={noise:.4f}')
+    
+    # Plot comparison data with dashed lines if provided
+    if comparison_data is not None:
+        for noise, rates in comparison_data.items():
+            plt.plot(rounds, rates, marker='s', linestyle='--', 
+                    label=f'EC Noise Rate={noise:.4f} ({comparison_label})')
     
     plt.xlabel('Number of Rounds')
     plt.ylabel(ylabel)
@@ -122,7 +140,8 @@ def write_experiment_metadata(
     ec_rate_1q: float = None,
     ec_rate_2q: float = None,
     meas_error_rate: float = 0.0,
-    channel_noise_rate: float = None
+    channel_noise_rate: float = None,
+    comparison_mode: bool = False
 ) -> None:
     """Write experiment metadata to a text file."""
     metadata_path = os.path.join(out_dir, "experiment_metadata.txt")
@@ -130,7 +149,9 @@ def write_experiment_metadata(
     with open(metadata_path, 'w') as f:
         f.write("Tesseract EC Experiment Metadata\n")
         f.write("=" * 35 + "\n\n")
+        # Record when and how this script was invoked
         f.write(f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        f.write(f"Command-line: {shlex.join(sys.argv)}\n\n")
         if runtime_seconds is not None:
             hours = int(runtime_seconds // 3600)
             minutes = int((runtime_seconds % 3600) // 60)
@@ -147,6 +168,7 @@ def write_experiment_metadata(
         f.write(f"Encoding mode: {encoding_mode}\n")
         f.write(f"Sweep channel noise: {sweep_channel_noise}\n")
         f.write(f"Measurement error rate: {meas_error_rate}\n")
+        f.write(f"Comparison mode: {comparison_mode}\n")
         
         # Report if using fixed rates vs sweep
         use_fixed_rates = (ec_rate_1q is not None and ec_rate_2q is not None) or channel_noise_rate is not None
@@ -177,6 +199,91 @@ def write_experiment_metadata(
     
     print(f"Metadata saved to {metadata_path}")
 
+def _run_and_process(
+    rounds: List[int],
+    noise_levels: List[float],
+    shots: int,
+    cfg_builder: Callable[[float], NoiseCfg],
+    encoding_mode: Literal['9a', '9b'],
+    apply_pauli_frame: bool
+) -> Tuple[Dict[float, List[float]], Dict[float, List[float]], Dict[float, List[float]]]:
+    """
+    Helper to run the EC experiment and process its results.
+    Returns EC acceptance, logical success, and average fidelity.
+    """
+    raw_results = sweep_results(
+        run_simulation_ec_experiment,
+        rounds, noise_levels, shots,
+        cfg_builder,
+        apply_pauli_frame=apply_pauli_frame,
+        encoding_mode=encoding_mode
+    )
+
+    ec_data = {
+        noise: [t[0]/shots for t in tuples]
+        for noise, tuples in raw_results.items()
+    }
+
+    logical_data = compute_logical_success_rate(raw_results)
+
+    fidelity_data = compute_average_fidelity(raw_results)
+
+    return ec_data, logical_data, fidelity_data
+
+def plot_metric(
+    rounds: List[int],
+    datasets: Dict[str, Dict[float, List[float]]],
+    title: str,
+    ylabel: str,
+    out_path: str,
+    xlim: Tuple[float, float] = None,
+    ylim: Tuple[float, float] = None,
+    styles: Dict[str, Tuple[str, str]] = None
+) -> None:
+    """
+    Plots and saves a single metric (e.g., acceptance, logical success, fidelity)
+    from sweep data, with optional comparison.
+    """
+    plt.figure(figsize=(12, 8))
+    # Assign consistent colors per noise value
+    all_noises = set()
+    for dataset in datasets.values():
+        all_noises.update(dataset.keys())
+    sorted_noises = sorted(all_noises)
+    prop_cycle = plt.rcParams.get('axes.prop_cycle')
+    colors = prop_cycle.by_key().get('color', []) if prop_cycle else []
+    color_map = {noise: colors[i % len(colors)] for i, noise in enumerate(sorted_noises)}
+
+    # Plot each labeled dataset
+    for label, dataset in datasets.items():
+        linestyle, marker = styles.get(label, ('-', 'o')) if styles else ('-', 'o')
+        for noise, rates in dataset.items():
+            plt.plot(
+                rounds,
+                rates,
+                color=color_map.get(noise),
+                linestyle=linestyle,
+                marker=marker,
+                label=f'{noise:.4f} ({label})'
+            )
+    
+    plt.xlabel('Number of Rounds')
+    plt.ylabel(ylabel)
+    plt.title(title)
+    plt.grid(True)
+    plt.legend()
+    
+    # Set axis limits if provided
+    if xlim is not None:
+        plt.xlim(xlim)
+    if ylim is not None:
+        plt.ylim(ylim)
+    
+    plt.savefig(out_path)
+    print(f"Plot saved to {out_path}")
+    plt.close()
+
+
 def plot_ec_experiment(
     rounds: List[int],
     noise_levels: List[float],
@@ -188,17 +295,17 @@ def plot_ec_experiment(
     ec_rate_1q: float = None,
     ec_rate_2q: float = None,
     meas_error_rate: float = 0.0,
-    channel_noise_rate: float = None
+    channel_noise_rate: float = None,
+    comparison_mode: bool = False
 ) -> None:
-    """Plots both EC acceptance and logical check rates for the EC experiment."""
+    """Plots EC experiment curves, optionally comparing with/without Pauli-frame correction."""
     start_time = time.time()
-    
     # Create timestamped output directory
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    out_dir = os.path.join(base_out_dir, f"ec_experiment_{timestamp}")
+    suffix = "_comparison" if comparison_mode else ""
+    out_dir = os.path.join(base_out_dir, f"ec_experiment_{timestamp}{suffix}")
     os.makedirs(out_dir, exist_ok=True)
-    
-    # One sweep collecting full results
+
     # Determine if we're using fixed rates or sweeping
     use_fixed_rates = (ec_rate_1q is not None and ec_rate_2q is not None) or channel_noise_rate is not None
     
@@ -246,71 +353,77 @@ def plot_ec_experiment(
                 meas_error_rate=meas_error_rate
             )
     
-    raw_results = sweep_results(
-        run_simulation_ec_experiment,
-        rounds, noise_levels, shots,
-        cfg_builder,
-        apply_pauli_frame=apply_pauli_frame,
-        encoding_mode=encoding_mode
+    # Run sweeping and processing in helper
+    ec_main, log_main, fid_main = _run_and_process(
+        rounds, noise_levels, shots, cfg_builder, encoding_mode, apply_pauli_frame
     )
 
-    # Derive EC acceptance rate from raw results
-    ec_data = {
-        noise: [t[0]/shots for t in tuples]  # ec_accept/shots
-        for noise, tuples in raw_results.items()
-    }
+    # Prepare datasets and styles
+    if comparison_mode:
+        ec_comp, log_comp, fid_comp = _run_and_process(
+            rounds, noise_levels, shots, cfg_builder, encoding_mode, not apply_pauli_frame
+        )
+        labels = ['with correction', 'without correction']
+        datasets_accept = {
+            labels[0]: ec_main,
+            labels[1]: ec_comp,
+        }
+        datasets_logical = {
+            labels[0]: log_main,
+            labels[1]: log_comp,
+        }
+        datasets_fidelity = {
+            labels[0]: fid_main,
+            labels[1]: fid_comp,
+        }
+        styles = {
+            labels[0]: ('-', 'o'),
+            labels[1]: ('--', 's'),
+        }
+    else:
+        label = 'with correction' if apply_pauli_frame else 'without correction'
+        datasets_accept = {label: ec_main}
+        datasets_logical = {label: log_main}
+        datasets_fidelity = {label: fid_main}
+        styles = {label: ('-', 'o')}
 
-    # Set fixed axis ranges
+    # Plot each metric
     max_rounds = max(rounds)
     x_range = (0, max_rounds)
-    
     noise_type = "Channel" if sweep_channel_noise else "EC"
-    plot_curve(
-        rounds, ec_data,
-        title=f"{noise_type} Acceptance vs Rounds (EC Experiment)",
+
+    plot_metric(
+        rounds, datasets_accept,
+        title=f"{noise_type} Acceptance vs Rounds (EC Experiment){' - Comparison' if comparison_mode else ''}",
         ylabel="EC Acceptance Rate",
         out_path=os.path.join(out_dir, 'acceptance_rates_ec_experiment.png'),
-        xlim=x_range,
-        ylim=(-0.01, 1.01)
+        xlim=x_range, ylim=(-0.01, 1.01), styles=styles
     )
-
-    # Derive logical check rate from same raw results - normalized by acceptance
-    logical_data = compute_logical_success_rate(raw_results)
-
-    plot_curve(
-        rounds, logical_data,
-        title=f"Logical Check Success vs Rounds (EC Experiment) - {noise_type} Noise",
+    plot_metric(
+        rounds, datasets_logical,
+        title=f"Logical Check Success vs Rounds (EC Experiment) - {noise_type} Noise{' - Comparison' if comparison_mode else ''}",
         ylabel="Logical Success Rate | Accepted",
         out_path=os.path.join(out_dir, 'logical_rates_ec_experiment.png'),
-        xlim=x_range,
-        ylim=(-0.01, 1.01)
+        xlim=x_range, ylim=(-0.01, 1.01), styles=styles
     )
-
-    # Derive average fidelity from same raw results
-    fidelity_data = compute_average_fidelity(raw_results)
-
-    plot_curve(
-        rounds, fidelity_data,
-        title=f"Average Fidelity vs Rounds (EC Experiment) - {noise_type} Noise",
+    plot_metric(
+        rounds, datasets_fidelity,
+        title=f"Average Fidelity vs Rounds (EC Experiment) - {noise_type} Noise{' - Comparison' if comparison_mode else ''}",
         ylabel="Average Fidelity",
         out_path=os.path.join(out_dir, 'fidelity_rates_ec_experiment.png'),
-        xlim=x_range,
-        ylim=(0.45, 1.01)
+        xlim=x_range, ylim=(0.45, 1.01), styles=styles
     )
-    
-    # Calculate total runtime and update metadata
-    end_time = time.time()
-    runtime_seconds = end_time - start_time
-    
+
     # Write final metadata with runtime
+    runtime_seconds = time.time() - start_time
     write_experiment_metadata(
-        out_dir, rounds, noise_levels, shots, 
+        out_dir, rounds, noise_levels, shots,
         apply_pauli_frame, encoding_mode, sweep_channel_noise,
         runtime_seconds=runtime_seconds,
-        ec_rate_1q=ec_rate_1q, ec_rate_2q=ec_rate_2q, 
-        meas_error_rate=meas_error_rate, channel_noise_rate=channel_noise_rate
+        ec_rate_1q=ec_rate_1q, ec_rate_2q=ec_rate_2q,
+        meas_error_rate=meas_error_rate, channel_noise_rate=channel_noise_rate,
+        comparison_mode=comparison_mode
     )
-    
     print(f"All experiment files saved to: {out_dir}")
     print(f"Total experiment runtime: {runtime_seconds:.1f} seconds")
 
@@ -352,6 +465,8 @@ def main():
                       help='Measurement error rate (SPAM error)')
     parser.add_argument('--channel-noise-rate', type=float, default=None,
                       help='Channel noise rate (overrides noise-levels sweep when using --sweep-channel-noise)')
+    parser.add_argument('--comparison-mode', action='store_true',
+                      help='Run comparison between experiments with and without apply_pauli_frame')
     args = parser.parse_args()
 
     # Use configurable values
@@ -365,7 +480,8 @@ def main():
         plot_ec_experiment(
             rounds, noise_levels, args.shots, args.out_dir, 
             args.apply_pauli_frame, args.encoding_mode, args.sweep_channel_noise,
-            args.ec_rate_1q, args.ec_rate_2q, args.meas_error_rate, args.channel_noise_rate
+            args.ec_rate_1q, args.ec_rate_2q, args.meas_error_rate, args.channel_noise_rate,
+            args.comparison_mode
         )
 
 if __name__ == "__main__":

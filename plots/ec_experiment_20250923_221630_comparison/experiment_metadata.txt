@@ -1,0 +1,25 @@
+Tesseract EC Experiment Metadata
+===================================
+
+Timestamp: 2025-09-23 23:19:41
+Command-line: tesseract_sim/plotting/plot_acceptance_rates.py --experiments 2 --noise-levels 0 0.001 0.002 0.004 0.006 0.008 0.01 --shots 1000000 --comparison-mode
+
+Total runtime: 01:03:11.225 (3791.225 seconds)
+
+Experiment Parameters:
+--------------------
+Rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20]
+Noise levels: [0.0, 0.001, 0.002, 0.004, 0.006, 0.008, 0.01]
+Shots per data point: 1000000
+Apply Pauli frame correction: False
+Encoding mode: 9a
+Sweep channel noise: False
+Measurement error rate: 0.0
+Comparison mode: True
+Mode: Sweeping noise rates
+Noise configuration: Sweeping EC/decoding noise
+  - EC noise applied: During error correction rounds and decoding
+  - EC 1Q rate: Swept parameter
+  - EC 2Q rate: Swept parameter (same as 1Q)
+  - Channel noise: None (0.0)
+  - Encoding: Noiseless
