@@ -8,6 +8,9 @@ import argparse
 from datetime import datetime
 import time
 
+# Add imports for capturing the CLI invocation
+import sys, shlex
+
 T = TypeVar('T')  # Type of experiment result
 
 def sweep_results(
@@ -146,7 +149,9 @@ def write_experiment_metadata(
     with open(metadata_path, 'w') as f:
         f.write("Tesseract EC Experiment Metadata\n")
         f.write("=" * 35 + "\n\n")
+        # Record when and how this script was invoked
         f.write(f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        f.write(f"Command-line: {shlex.join(sys.argv)}\n\n")
         if runtime_seconds is not None:
             hours = int(runtime_seconds // 3600)
             minutes = int((runtime_seconds % 3600) // 60)
