@@ -3,13 +3,13 @@
 [![DOI](https://zenodo.org/badge/1014457478.svg)](https://doi.org/10.5281/zenodo.17137850)
 
 ## Overview
-• **What it is**: A complete Stim-based [[3]](#references) simulation of the Tesseract quantum error correction code [[1]](#references) with gate-level encoding, error correction rounds, and manual decoding.
+This project is a Stim-based [[3]](#references) simulation of the Tesseract quantum error correction code [[1]](#references) with gate-level encoding, error correction rounds, and manual decoding. It features the full error correction pipeline, including two encoding modes, configurable noise, stabilizer measurement rounds, Pauli frame tracking, and acceptance/fidelity analysis.
 
-• **Why it matters**: The [[16,4,4]] Tesseract subsystem color code offers practical fault tolerance for NISQ devices; encoding 4 logical qubits with single-shot error correction using only 2 ancilla qubits. This makes it viable for current trapped-ion platforms and a stepping stone to larger codes.
+### Motivation
+The [[16,4,4]] Tesseract subsystem color code offers practical fault tolerance for NISQ devices; encoding 4 logical qubits with single-shot error correction using only 2 ancilla qubits. This makes it viable for current trapped-ion platforms and a stepping stone to larger codes. This code was derived from the original [[16,6,4]] Tesseract code by sacrificing 2 logical qubits and treating them as gauge qubits.
 
-• **What's implemented**: Full error correction pipeline including two encoding modes, configurable noise, stabilizer measurement rounds, Pauli frame tracking, and acceptance/fidelity analysis.
-
-• **Validation status**: Error correction improves fidelity as expected, but quantitative reproduction of paper results is work-in-progress. Acceptance rates show correct trend but offset (~1.0 vs ~0.85 baseline); logical error rates have correct shape but ~10× scaling difference.
+### Validation status
+Error correction improves fidelity as expected, but quantitative reproduction of paper results is a work-in-progress. Acceptance rates show correct trend but offset (~1.0 vs ~0.85 baseline); logical error rates have correct shape but ~10× scaling difference.
 
 ![Figure 1: Tesseract code structure (from [1])](docs/images/fig1_tesseract_code.png)
 
